@@ -157,7 +157,10 @@ const ApartmentDetail = () => {
 
               <div className="flex items-center gap-2 text-dark-500 dark:text-dark-400 text-sm">
                 <MapPin size={14} className="text-primary-500 shrink-0" />
-                <span>{apartment.location}</span>
+                <span>
+                  Building {apartment.buildingNo}, Apt {apartment.apartmentNo}
+                  {apartment.districtId ? `, ${apartment.districtId.name}` : ''}
+                </span>
               </div>
             </motion.div>
 
@@ -208,35 +211,7 @@ const ApartmentDetail = () => {
               </div>
             )}
 
-            {/* Google Maps Embed */}
-            {apartment.googleMapsUrl && (
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="font-display font-semibold text-lg text-dark-900 dark:text-white">Location</h2>
-                  <a
-                    href={apartment.googleMapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    id="open-maps"
-                    className="btn-ghost text-xs"
-                  >
-                    <ExternalLink size={13} /> Open in Maps
-                  </a>
-                </div>
-                <div className="rounded-2xl overflow-hidden border border-dark-100 dark:border-dark-700 h-72">
-                  <iframe
-                    src={apartment.googleMapsUrl}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title="Apartment location on Google Maps"
-                  />
-                </div>
-              </div>
-            )}
+
 
             {/* Meta */}
             <div className="flex items-center gap-2 text-xs text-dark-400 dark:text-dark-500">

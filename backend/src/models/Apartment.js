@@ -24,20 +24,20 @@ const apartmentSchema = new mongoose.Schema(
       default: '',
       trim: true,
     },
+    buildingNo: {
+      type: String,
+      required: [true, 'Building number is required'],
+      trim: true,
+    },
+    apartmentNo: {
+      type: String,
+      required: [true, 'Apartment number is required'],
+      trim: true,
+    },
     price: {
       type: Number,
       required: [true, 'Price is required'],
       min: [0, 'Price cannot be negative'],
-    },
-    location: {
-      type: String,
-      required: [true, 'Location is required'],
-      trim: true,
-    },
-    googleMapsUrl: {
-      type: String,
-      default: '',
-      trim: true,
     },
     images: {
       type: [String],

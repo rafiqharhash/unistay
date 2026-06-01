@@ -110,7 +110,7 @@ const createDistrict = async (req, res, next) => {
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    const { name, description } = req.body;
+    const { name, description, googleMapsUrl } = req.body;
     let coverImage = '';
 
     if (req.file) {
@@ -118,7 +118,7 @@ const createDistrict = async (req, res, next) => {
       coverImage = result.secure_url;
     }
 
-    const district = await District.create({ name, description, coverImage });
+    const district = await District.create({ name, description, coverImage, googleMapsUrl });
 
     res.status(201).json({
       success: true,
@@ -140,9 +140,10 @@ const updateDistrict = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'District not found.' });
     }
 
-    const { name, description } = req.body;
+    const { name, description, googleMapsUrl } = req.body;
     if (name) district.name = name;
     if (description !== undefined) district.description = description;
+    if (googleMapsUrl !== undefined) district.googleMapsUrl = googleMapsUrl;
 
     if (req.file) {
       // Delete old image

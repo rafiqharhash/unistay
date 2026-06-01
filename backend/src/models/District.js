@@ -12,6 +12,11 @@ const districtSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    googleMapsUrl: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     description: {
       type: String,
       default: '',

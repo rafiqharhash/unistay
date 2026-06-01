@@ -175,9 +175,9 @@ const createApartment = async (req, res, next) => {
       districtId: req.body.districtId,
       title: req.body.title,
       description: req.body.description,
+      buildingNo: req.body.buildingNo,
+      apartmentNo: req.body.apartmentNo,
       price: Number(req.body.price),
-      location: req.body.location,
-      googleMapsUrl: req.body.googleMapsUrl || '',
       images,
       rooms: Number(req.body.rooms),
       capacity: Number(req.body.capacity) || 1,
@@ -245,8 +245,8 @@ const updateApartment = async (req, res, next) => {
 
     // Update fields
     const updatableFields = [
-      'apartmentId', 'districtId', 'title', 'description',
-      'location', 'googleMapsUrl', 'rooms',
+      'apartmentId', 'districtId', 'title', 'description', 'rooms',
+      'buildingNo', 'apartmentNo',
     ];
     updatableFields.forEach((field) => {
       if (req.body[field] !== undefined) apartment[field] = req.body[field];

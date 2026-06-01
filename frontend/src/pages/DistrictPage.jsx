@@ -123,6 +123,21 @@ const DistrictPage = () => {
               <div className="shimmer h-4 rounded-lg w-64" />
             </div>
           )}
+
+          {district?.googleMapsUrl && (
+            <div className="mt-8 rounded-2xl overflow-hidden border border-dark-100 dark:border-dark-700 h-64 sm:h-80 shadow-sm">
+              <iframe
+                src={district.googleMapsUrl}
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="District location on Google Maps"
+              />
+            </div>
+          )}
         </div>
       </div>
 

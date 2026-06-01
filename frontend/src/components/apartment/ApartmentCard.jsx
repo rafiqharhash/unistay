@@ -74,7 +74,10 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
         {/* Location */}
         <div className="flex items-center gap-1.5 text-sm text-dark-500 dark:text-dark-400">
           <MapPin size={13} className="text-primary-500 shrink-0" />
-          <span className="line-clamp-1">{apartment.location}</span>
+          <span className="line-clamp-1">
+            Bldg {apartment.buildingNo}, Apt {apartment.apartmentNo}
+            {apartment.districtId?.name ? `, ${apartment.districtId.name}` : ''}
+          </span>
         </div>
 
         {/* Badges */}
@@ -84,11 +87,6 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
             {apartment.available ? 'Available' : 'Unavailable'}
           </span>
           <span className={gender.className}>{gender.label}</span>
-          {apartment.districtId?.name && (
-            <span className="badge bg-dark-100 dark:bg-dark-700 text-dark-600 dark:text-dark-300">
-              {apartment.districtId.name}
-            </span>
-          )}
         </div>
 
         {/* Stats Row */}

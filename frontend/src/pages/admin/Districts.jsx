@@ -12,6 +12,7 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
   const [form, setForm] = useState({
     name: district?.name || '',
     description: district?.description || '',
+    googleMapsUrl: district?.googleMapsUrl || '',
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(district?.coverImage || '');
@@ -34,6 +35,7 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
       const fd = new FormData();
       fd.append('name', form.name.trim());
       fd.append('description', form.description.trim());
+      fd.append('googleMapsUrl', form.googleMapsUrl.trim());
       if (imageFile) fd.append('coverImage', imageFile);
 
       if (district) {
@@ -96,6 +98,20 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
               rows={3}
               placeholder="Brief description of the district..."
             />
+          </div>
+
+          {/* Google Maps URL */}
+          <div>
+            <label className="label" htmlFor="district-maps">Google Maps Embed URL</label>
+            <input
+              id="district-maps"
+              type="url"
+              value={form.googleMapsUrl}
+              onChange={(e) => setForm({ ...form, googleMapsUrl: e.target.value })}
+              className="input"
+              placeholder="https://www.google.com/maps/embed?..."
+            />
+            <p className="text-xs text-dark-400 mt-1">Paste the embed URL from Google Maps (Share → Embed a map → Copy HTML, then use the src value)</p>
           </div>
 
           {/* Cover Image */}

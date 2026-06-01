@@ -24,9 +24,9 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
     districtId: apartment?.districtId?._id || apartment?.districtId || '',
     title: apartment?.title || '',
     description: apartment?.description || '',
+    buildingNo: apartment?.buildingNo || '',
+    apartmentNo: apartment?.apartmentNo || '',
     price: apartment?.price || '',
-    location: apartment?.location || '',
-    googleMapsUrl: apartment?.googleMapsUrl || '',
     rooms: apartment?.rooms || '',
     capacity: apartment?.capacity || 1,
     gender: apartment?.gender || 'male',
@@ -91,9 +91,9 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
       fd.append('districtId', form.districtId);
       fd.append('title', form.title);
       fd.append('description', form.description);
+      fd.append('buildingNo', form.buildingNo);
+      fd.append('apartmentNo', form.apartmentNo);
       fd.append('price', form.price);
-      fd.append('location', form.location);
-      fd.append('googleMapsUrl', form.googleMapsUrl);
       fd.append('rooms', form.rooms);
       fd.append('capacity', form.capacity);
       fd.append('gender', form.gender);
@@ -208,6 +208,17 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
+                    <label className="label" htmlFor="apt-building">Building Number *</label>
+                    <input id="apt-building" type="text" value={form.buildingNo} onChange={(e) => setForm({ ...form, buildingNo: e.target.value })} className="input" placeholder="e.g. 15A" required />
+                  </div>
+                  <div>
+                    <label className="label" htmlFor="apt-number">Apartment Number *</label>
+                    <input id="apt-number" type="text" value={form.apartmentNo} onChange={(e) => setForm({ ...form, apartmentNo: e.target.value })} className="input" placeholder="e.g. 402" required />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
                     <label className="label" htmlFor="apt-price">Price ($/mo) *</label>
                     <input id="apt-price" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="input" placeholder="500" min="0" required />
                   </div>
@@ -215,17 +226,6 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                     <label className="label" htmlFor="apt-rooms">Rooms *</label>
                     <input id="apt-rooms" type="number" value={form.rooms} onChange={(e) => setForm({ ...form, rooms: e.target.value })} className="input" placeholder="1" min="1" required />
                   </div>
-                </div>
-
-                <div>
-                  <label className="label" htmlFor="apt-location">Exact Location *</label>
-                  <input id="apt-location" type="text" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} className="input" placeholder="Full street address" required />
-                </div>
-
-                <div>
-                  <label className="label" htmlFor="apt-maps">Google Maps Embed URL</label>
-                  <input id="apt-maps" type="url" value={form.googleMapsUrl} onChange={(e) => setForm({ ...form, googleMapsUrl: e.target.value })} className="input" placeholder="https://www.google.com/maps/embed?..." />
-                  <p className="text-xs text-dark-400 mt-1">Paste the embed URL from Google Maps (Share → Embed a map → Copy HTML, then use the src value)</p>
                 </div>
               </div>
             )}
