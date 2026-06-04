@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Search, Building2 } from 'lucide-react';
+import { Search, Building2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../context/LanguageContext';
 import { apartmentAPI } from '../api/axios';
 import ApartmentCard from '../components/apartment/ApartmentCard';
 import FilterBar from '../components/apartment/FilterBar';
@@ -9,6 +11,9 @@ import Pagination from '../components/common/Pagination';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
+
   const initialQuery = searchParams.get('q') || '';
   const initialFeatured = searchParams.get('featured') || '';
 
@@ -21,6 +26,8 @@ const SearchResults = () => {
     sort: 'newest',
     featured: initialFeatured,
   });
+
+  const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
 
   useEffect(() => {
     document.title = initialQuery
@@ -55,6 +62,12 @@ const SearchResults = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const pageTitle = initialQuery
+    ? t('search.results_for', { query: initialQuery })
+    : initialFeatured
+    ? t('search.featured_title')
+    : t('search.all_title');
+
   return (
     <div className="animate-fade-in">
       {/* Header */}
@@ -65,16 +78,12 @@ const SearchResults = () => {
               <Search size={18} className="text-primary-500" />
             </div>
             <h1 className="font-display font-bold text-2xl text-dark-900 dark:text-white">
-              {initialQuery
-                ? `Results for "${initialQuery}"`
-                : initialFeatured
-                ? 'Featured Apartments'
-                : 'All Apartments'}
+              {pageTitle}
             </h1>
           </div>
           {!loading && (
-            <p className="text-sm text-dark-500 dark:text-dark-400 ml-12">
-              {pagination.total} apartment{pagination.total !== 1 ? 's' : ''} found
+            <p className="text-sm text-dark-500 dark:text-dark-400 ms-12">
+              {t('search.results_other', { count: pagination.total })}
             </p>
           )}
         </div>
@@ -98,12 +107,14 @@ const SearchResults = () => {
           <div className="text-center py-20">
             <Building2 size={56} className="text-dark-300 dark:text-dark-600 mx-auto mb-4" />
             <h2 className="font-display font-semibold text-xl text-dark-700 dark:text-dark-300 mb-2">
-              No apartments found
+              {t('search.no_results_title')}
             </h2>
             <p className="text-dark-500 dark:text-dark-400 text-sm mb-6">
-              Try adjusting your search or filters.
+              {t('search.no_results_subtitle')}
             </p>
-            <Link to="/" className="btn-secondary">Browse Districts</Link>
+            <Link to="/" className="btn-secondary">
+              {t('search.browse_districts')}
+            </Link>
           </div>
         )}
 

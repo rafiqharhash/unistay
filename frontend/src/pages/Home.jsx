@@ -2,23 +2,20 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  Search, ArrowRight, Building2, MapPin, Star,
-  Users, ChevronDown, Sparkles
+  Search, ArrowRight, ArrowLeft, Building2, MapPin, Star,
+  Users, ChevronDown, Sparkles,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../context/LanguageContext';
 import { districtAPI, apartmentAPI } from '../api/axios';
 import DistrictCard from '../components/district/DistrictCard';
 import ApartmentCard from '../components/apartment/ApartmentCard';
 import { SkeletonDistrictCard } from '../components/common/SkeletonCard';
 import SkeletonCard from '../components/common/SkeletonCard';
 
-const HERO_STATS = [
-  { icon: Building2, label: 'Apartments', value: '200+' },
-  { icon: MapPin, label: 'Districts', value: '15+' },
-  { icon: Users, label: 'Students Housed', value: '1000+' },
-  { icon: Star, label: 'Avg Rating', value: '4.8★' },
-];
-
 const Home = () => {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [districts, setDistricts] = useState([]);
@@ -26,6 +23,13 @@ const Home = () => {
   const [loadingDistricts, setLoadingDistricts] = useState(true);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
   const [showAllDistricts, setShowAllDistricts] = useState(false);
+
+  const HERO_STATS = [
+    { icon: Building2, label: t('home.stats_apartments'), value: '200+' },
+    { icon: MapPin,     label: t('home.stats_districts'),  value: '15+'  },
+    { icon: Users,      label: t('home.stats_students'),   value: '1000+'},
+    { icon: Star,       label: t('home.stats_rating'),     value: '4.8★' },
+  ];
 
   useEffect(() => {
     document.title = 'UniStay - Student Housing Made Simple';
@@ -47,6 +51,7 @@ const Home = () => {
   };
 
   const visibleDistricts = showAllDistricts ? districts : districts.slice(0, 3);
+  const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
 
   return (
     <div className="animate-fade-in">
@@ -61,10 +66,11 @@ const Home = () => {
         </div>
 
         {/* Grid pattern */}
-        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+        <div
+          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
           style={{
             backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-            backgroundSize: '60px 60px'
+            backgroundSize: '60px 60px',
           }}
         />
 
@@ -83,42 +89,47 @@ const Home = () => {
               className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-6 text-sm text-primary-300"
             >
               <Sparkles size={14} className="text-primary-400" />
-              Find Your Perfect Student Home
+              {t('home.badge')}
             </motion.div>
 
             <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl text-white leading-tight mb-6">
-              Furnished Apartments
+              {t('home.hero_title_1')}
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-primary-600">
-                Made for Students
+                {t('home.hero_title_2')}
               </span>
             </h1>
 
             <p className="text-lg text-dark-300 mb-10 max-w-xl mx-auto leading-relaxed">
-              Browse furnished apartments by district, search by ID, and connect with landlords — all in one place.
+              {t('home.hero_subtitle')}
             </p>
 
             {/* Search Bar */}
             <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto mb-10">
               <div className="relative flex-1">
-                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-400" />
+                <Search
+                  size={18}
+                  className={`absolute top-1/2 -translate-y-1/2 text-dark-400 pointer-events-none ${
+                    isRTL ? 'right-4' : 'left-4'
+                  }`}
+                />
                 <input
                   id="hero-search"
                   type="text"
-                  placeholder="Search by apartment ID (e.g. APT-001)..."
+                  placeholder={t('home.search_placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all text-sm"
+                  className={`w-full ${isRTL ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-3.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all text-sm`}
                 />
               </div>
               <button type="submit" className="btn-primary px-6 py-3.5 text-base">
-                Search
-                <ArrowRight size={18} />
+                {t('home.search_btn')}
+                <ArrowIcon size={18} />
               </button>
             </form>
 
             {/* Quick links */}
             <div className="flex flex-wrap items-center justify-center gap-2 text-sm">
-              <span className="text-dark-400">Browse:</span>
+              <span className="text-dark-400">{t('home.browse_label')}</span>
               {districts.slice(0, 4).map((d) => (
                 <Link
                   key={d._id}
@@ -128,8 +139,11 @@ const Home = () => {
                   {d.name}
                 </Link>
               ))}
-              <Link to="/search" className="px-3 py-1 rounded-full border border-primary-500/50 text-primary-400 hover:bg-primary-500/10 transition-all text-xs">
-                View All →
+              <Link
+                to="/search"
+                className="px-3 py-1 rounded-full border border-primary-500/50 text-primary-400 hover:bg-primary-500/10 transition-all text-xs"
+              >
+                {t('home.view_all')}
               </Link>
             </div>
           </motion.div>
@@ -177,12 +191,14 @@ const Home = () => {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <Star size={16} className="text-amber-500 fill-amber-500" />
-                  <span className="text-xs font-semibold text-amber-500 uppercase tracking-wider">Featured</span>
+                  <span className="text-xs font-semibold text-amber-500 uppercase tracking-wider">
+                    {t('home.featured_label')}
+                  </span>
                 </div>
-                <h2 className="section-title">Featured Apartments</h2>
+                <h2 className="section-title">{t('home.featured_title')}</h2>
               </div>
               <Link to="/search?featured=true" className="btn-secondary hidden sm:flex">
-                View All <ArrowRight size={15} />
+                {t('home.featured_view_all')} <ArrowIcon size={15} />
               </Link>
             </div>
 
@@ -197,7 +213,7 @@ const Home = () => {
 
             <div className="text-center mt-6 sm:hidden">
               <Link to="/search?featured=true" className="btn-secondary">
-                View All Featured <ArrowRight size={15} />
+                {t('home.featured_view_all')} <ArrowIcon size={15} />
               </Link>
             </div>
           </div>
@@ -209,10 +225,12 @@ const Home = () => {
         <div className="page-container">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <p className="text-xs font-semibold text-primary-500 uppercase tracking-wider mb-1">Explore</p>
-              <h2 className="section-title">Browse by District</h2>
+              <p className="text-xs font-semibold text-primary-500 uppercase tracking-wider mb-1">
+                {t('home.explore_label')}
+              </p>
+              <h2 className="section-title">{t('home.districts_title')}</h2>
               <p className="text-dark-500 dark:text-dark-400 mt-1 text-sm">
-                Discover apartments in your preferred area
+                {t('home.districts_subtitle')}
               </p>
             </div>
             {districts.length > 3 && !showAllDistricts && (
@@ -221,7 +239,7 @@ const Home = () => {
                 id="show-all-districts"
                 className="btn-secondary hidden sm:flex"
               >
-                See All ({districts.length}) <ArrowRight size={15} />
+                {t('home.see_all', { count: districts.length })} <ArrowIcon size={15} />
               </button>
             )}
           </div>
@@ -242,7 +260,7 @@ const Home = () => {
                 id="load-more-districts"
                 className="btn-secondary"
               >
-                Load More Districts ({districts.length - 3} more)
+                {t('home.load_more', { count: districts.length - 3 })}
                 <ChevronDown size={16} />
               </button>
             </div>
@@ -254,7 +272,7 @@ const Home = () => {
                 onClick={() => setShowAllDistricts(false)}
                 className="btn-ghost text-sm"
               >
-                Show Less
+                {t('home.show_less')}
               </button>
             </div>
           )}
@@ -262,7 +280,7 @@ const Home = () => {
           {!loadingDistricts && districts.length === 0 && (
             <div className="text-center py-16">
               <Building2 size={48} className="text-dark-300 dark:text-dark-600 mx-auto mb-4" />
-              <p className="text-dark-500 dark:text-dark-400">No districts added yet.</p>
+              <p className="text-dark-500 dark:text-dark-400">{t('home.no_districts')}</p>
             </div>
           )}
         </div>
@@ -277,14 +295,18 @@ const Home = () => {
             viewport={{ once: true }}
           >
             <h2 className="font-display font-bold text-3xl text-white mb-3">
-              Ready to find your student home?
+              {t('home.cta_title')}
             </h2>
             <p className="text-primary-100 mb-8 max-w-md mx-auto">
-              Browse all available apartments and find the perfect fit for your university life.
+              {t('home.cta_subtitle')}
             </p>
-            <Link to="/search" id="cta-search" className="inline-flex items-center gap-2 bg-white text-primary-600 hover:bg-primary-50 font-bold px-8 py-3.5 rounded-xl transition-all duration-200 hover:shadow-lg">
-              Browse All Apartments
-              <ArrowRight size={18} />
+            <Link
+              to="/search"
+              id="cta-search"
+              className="inline-flex items-center gap-2 bg-white text-primary-600 hover:bg-primary-50 font-bold px-8 py-3.5 rounded-xl transition-all duration-200 hover:shadow-lg"
+            >
+              {t('home.cta_btn')}
+              <ArrowIcon size={18} />
             </Link>
           </motion.div>
         </div>

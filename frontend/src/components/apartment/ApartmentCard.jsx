@@ -2,20 +2,28 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   MapPin, BedDouble, Users, Wifi, Wind, Star,
-  CheckCircle, XCircle, Phone, ChevronRight
+  CheckCircle, XCircle, ChevronRight, ChevronLeft,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../../context/LanguageContext';
 
 const formatPrice = (price) =>
   new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(price);
 
-const genderConfig = {
-  male: { label: 'Male Only', className: 'badge-male' },
-  female: { label: 'Female Only', className: 'badge-female' },
-};
-
 const ApartmentCard = ({ apartment, index = 0 }) => {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const firstImage = apartment.images?.[0];
-  const gender = genderConfig[apartment.gender] ?? genderConfig.male;
+
+  const genderLabel = apartment.gender === 'male'
+    ? t('apartment.male_only')
+    : apartment.gender === 'female'
+    ? t('apartment.female_only')
+    : null;
+
+  const genderClass = apartment.gender === 'male' ? 'badge-male' : 'badge-female';
+
+  const ArrowIcon = isRTL ? ChevronLeft : ChevronRight;
 
   return (
     <motion.div
@@ -41,21 +49,23 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
 
         {/* Image count badge */}
         {apartment.images?.length > 1 && (
-          <div className="absolute bottom-2 right-2 glass rounded-lg px-2 py-1 flex items-center gap-1">
-            <span className="text-white text-xs font-medium">+{apartment.images.length - 1} photos</span>
+          <div className={`absolute bottom-2 ${isRTL ? 'left-2' : 'right-2'} glass rounded-lg px-2 py-1 flex items-center gap-1`}>
+            <span className="text-white text-xs font-medium">
+              {t('apartment.photos', { count: apartment.images.length - 1 })}
+            </span>
           </div>
         )}
 
         {/* Featured star */}
         {apartment.featured && (
-          <div className="absolute top-3 left-3 bg-amber-400 text-amber-900 rounded-full p-1.5 shadow-md">
+          <div className={`absolute top-3 ${isRTL ? 'right-3' : 'left-3'} bg-amber-400 text-amber-900 rounded-full p-1.5 shadow-md`}>
             <Star size={12} fill="currentColor" />
           </div>
         )}
 
         {/* Price badge */}
-        <div className="absolute top-3 right-3 bg-primary-500 text-white rounded-xl px-3 py-1.5 font-bold text-sm shadow-glow-orange">
-          {formatPrice(apartment.price)}<span className="font-normal text-xs">/mo</span>
+        <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'} bg-primary-500 text-white rounded-xl px-3 py-1.5 font-bold text-sm shadow-glow-orange`}>
+          {formatPrice(apartment.price)}<span className="font-normal text-xs">{isRTL ? '/شهر' : '/mo'}</span>
         </div>
       </div>
 
@@ -75,7 +85,10 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
         <div className="flex items-center gap-1.5 text-sm text-dark-500 dark:text-dark-400">
           <MapPin size={13} className="text-primary-500 shrink-0" />
           <span className="line-clamp-1">
-            Bldg {apartment.buildingNo}, Apt {apartment.apartmentNo}
+            {t('apartment.building_apt', {
+              building: apartment.buildingNo,
+              apt: apartment.apartmentNo,
+            })}
             {apartment.districtId?.name ? `, ${apartment.districtId.name}` : ''}
           </span>
         </div>
@@ -84,20 +97,20 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
         <div className="flex flex-wrap gap-1.5">
           <span className={apartment.available ? 'badge-available' : 'badge-unavailable'}>
             {apartment.available ? <CheckCircle size={11} /> : <XCircle size={11} />}
-            {apartment.available ? 'Available' : 'Unavailable'}
+            {apartment.available ? t('apartment.available') : t('apartment.unavailable')}
           </span>
-          <span className={gender.className}>{gender.label}</span>
+          {genderLabel && <span className={genderClass}>{genderLabel}</span>}
         </div>
 
         {/* Stats Row */}
         <div className="flex items-center gap-4 text-sm text-dark-500 dark:text-dark-400">
           <span className="flex items-center gap-1.5">
             <BedDouble size={14} className="text-dark-400" />
-            {apartment.rooms} {apartment.rooms === 1 ? 'room' : 'rooms'}
+            {t('apartment.room_one', { count: apartment.rooms })}
           </span>
           <span className="flex items-center gap-1.5">
             <Users size={14} className="text-dark-400" />
-            {apartment.capacity} {apartment.capacity === 1 ? 'student' : 'students'}
+            {t('apartment.student_one', { count: apartment.capacity })}
           </span>
           {apartment.wifi && <Wifi size={14} className="text-emerald-500" />}
           {apartment.airConditioning && <Wind size={14} className="text-blue-500" />}
@@ -112,8 +125,8 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
           id={`apartment-card-${apartment._id}`}
           className="btn-primary w-full justify-center mt-1"
         >
-          View Details
-          <ChevronRight size={15} />
+          {t('apartment.view_details')}
+          <ArrowIcon size={15} />
         </Link>
       </div>
     </motion.div>

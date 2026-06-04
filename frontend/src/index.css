@@ -19,7 +19,6 @@
     --color-border: #334155;
   }
 
-
   html {
     scroll-behavior: smooth;
   }
@@ -30,6 +29,25 @@
     @apply text-dark-900 dark:text-dark-100;
     @apply transition-colors duration-300;
   }
+
+  /* ── Arabic typography ───────────────────────────────── */
+  /* Activated when <body class="font-arabic"> is set by LanguageContext */
+  body.font-arabic,
+  body.font-arabic * {
+    font-family: 'IBM Plex Sans Arabic', 'Noto Sans Arabic', 'Tajawal', system-ui, sans-serif !important;
+    line-height: 1.85;
+    letter-spacing: 0;
+    word-spacing: 0.02em;
+  }
+
+  body.font-arabic .font-display {
+    font-family: 'IBM Plex Sans Arabic', 'Noto Sans Arabic', system-ui, sans-serif !important;
+    font-weight: 700;
+  }
+
+  /* Larger text comfort for Arabic at small sizes */
+  body.font-arabic .text-xs { font-size: 0.8rem; }
+  body.font-arabic .text-sm { font-size: 0.9rem; }
 
   ::-webkit-scrollbar {
     width: 6px;
@@ -100,10 +118,13 @@
            placeholder-dark-400 dark:placeholder-dark-500
            focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent
            transition-all duration-200 text-sm;
+    /* Use text-align start so it follows direction automatically */
+    text-align: start;
   }
 
   .label {
     @apply block text-sm font-medium text-dark-600 dark:text-dark-300 mb-1.5;
+    text-align: start;
   }
 
   .badge {
@@ -157,6 +178,80 @@
   }
 }
 
+/* ════════════════════════════════════════════════════════════
+   RTL OVERRIDES — applied when <html dir="rtl">
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Flip directional icons (chevrons, arrows) ── */
+[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}
+
+/* ── Input icons: swap from left to right in RTL ── */
+[dir="rtl"] .input-icon-ltr {
+  right: 0.75rem;
+  left: auto;
+}
+
+/* ── Swap padding for left-padded inputs (icon inside) ── */
+[dir="rtl"] .pl-9  { padding-left: 1rem;   padding-right: 2.25rem; }
+[dir="rtl"] .pl-10 { padding-left: 1rem;   padding-right: 2.5rem;  }
+[dir="rtl"] .pl-11 { padding-left: 1rem;   padding-right: 2.75rem; }
+[dir="rtl"] .pl-8  { padding-left: 1rem;   padding-right: 2rem;    }
+[dir="rtl"] .pr-9  { padding-right: 1rem;  padding-left: 2.25rem;  }
+[dir="rtl"] .pr-10 { padding-right: 1rem;  padding-left: 2.5rem;   }
+
+/* ── Input icons absolute positioning ── */
+[dir="rtl"] .absolute.left-3   { left: auto; right: 0.75rem; }
+[dir="rtl"] .absolute.left-3\.5 { left: auto; right: 0.875rem; }
+[dir="rtl"] .absolute.left-4   { left: auto; right: 1rem; }
+[dir="rtl"] .absolute.right-3  { right: auto; left: 0.75rem; }
+[dir="rtl"] .absolute.right-3\.5 { right: auto; left: 0.875rem; }
+
+/* ── Table header text alignment ── */
+[dir="rtl"] th.text-left   { text-align: right; }
+[dir="rtl"] th.text-right  { text-align: left; }
+[dir="rtl"] td.text-right  { text-align: left; }
+
+/* ── Modal content align start ── */
+[dir="rtl"] .modal-content {
+  text-align: start;
+}
+
+/* ── ChevronRight used as "next" should become "previous" in RTL ── */
+[dir="rtl"] .pagination-icon {
+  transform: scaleX(-1);
+}
+
+/* ── Toast notifications RTL ── */
+[dir="rtl"] .react-hot-toast > div {
+  direction: rtl;
+  text-align: right;
+}
+
+/* ── Dropdown select chevron swap ── */
+[dir="rtl"] select.appearance-none {
+  padding-right: 1rem;
+  padding-left: 2.25rem;
+  background-position: left 0.75rem center;
+}
+
+/* ── Admin table action column: swap justify-end ── */
+[dir="rtl"] .flex.justify-end {
+  flex-direction: row-reverse;
+}
+
+/* ── Language switcher transition ── */
+.lang-switch-enter {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+.lang-switch-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
 /* Swiper custom styles */
 .swiper-button-next,
 .swiper-button-prev {
@@ -167,7 +262,21 @@
   background: #f97316 !important;
 }
 
+/* In RTL, swap Swiper nav buttons */
+[dir="rtl"] .swiper-button-next {
+  left: 10px;
+  right: auto;
+}
+[dir="rtl"] .swiper-button-prev {
+  right: 10px;
+  left: auto;
+}
+
 /* Toast custom styles */
 .hot-toast {
   font-family: 'Inter', sans-serif !important;
+}
+
+body.font-arabic .hot-toast {
+  font-family: 'IBM Plex Sans Arabic', 'Noto Sans Arabic', system-ui, sans-serif !important;
 }

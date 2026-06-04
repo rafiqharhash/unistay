@@ -34,6 +34,13 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         display: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif'],
+        arabic: [
+          'IBM Plex Sans Arabic',
+          'Noto Sans Arabic',
+          'Tajawal',
+          'system-ui',
+          'sans-serif',
+        ],
       },
       animation: {
         'shimmer': 'shimmer 1.5s infinite',

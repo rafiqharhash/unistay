@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Edit, Trash2, X, Upload, Building2, Star, Check,
-  ChevronLeft, AlertCircle, Search, Hash, Filter,
-  CheckCircle, XCircle, ToggleLeft, ToggleRight, ChevronDown
+  ChevronLeft, ChevronRight, AlertCircle, Search, Hash, Filter,
+  CheckCircle, XCircle, ToggleLeft, ToggleRight, ChevronDown,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../../context/LanguageContext';
 import { apartmentAPI, districtAPI } from '../../api/axios';
 
 const formatPrice = (p) =>
@@ -18,7 +20,12 @@ const AMENITIES_SUGGESTIONS = [
   'Gym', 'Laundry', 'Storage', 'Electricity Included', 'Water Included',
 ];
 
+// ─── Apartment Modal ──────────────────────────────────────────────────────────
+
 const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
+
   const [form, setForm] = useState({
     apartmentId: apartment?.apartmentId || '',
     districtId: apartment?.districtId?._id || apartment?.districtId || '',
@@ -52,7 +59,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     const validFiles = files.filter((f) => f.type.startsWith('image/'));
-    if (validFiles.length !== files.length) toast.error('Some files were skipped (not images).');
+    if (validFiles.length !== files.length) toast.error(t('admin.apartments.some_skipped'));
     setNewFiles((prev) => [...prev, ...validFiles]);
     setNewPreviews((prev) => [...prev, ...validFiles.map((f) => URL.createObjectURL(f))]);
   };
@@ -80,8 +87,8 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.apartmentId || !form.districtId || !form.title || !form.price || !form.location || !form.rooms) {
-      toast.error('Please fill all required fields.');
+    if (!form.apartmentId || !form.districtId || !form.title || !form.price || !form.rooms) {
+      toast.error(t('admin.apartments.fill_required'));
       return;
     }
     setLoading(true);
@@ -115,24 +122,31 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
       if (apartment) {
         await apartmentAPI.update(apartment._id, fd);
-        toast.success('Apartment updated!');
+        toast.success(t('admin.apartments.updated'));
       } else {
         await apartmentAPI.create(fd);
-        toast.success('Apartment created!');
+        toast.success(t('admin.apartments.created'));
       }
       onSaved();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Operation failed.');
+      toast.error(err.response?.data?.message || t('admin.apartments.op_failed'));
     } finally {
       setLoading(false);
     }
   };
 
   const tabs = [
-    { id: 'basic', label: 'Basic Info' },
-    { id: 'details', label: 'Details' },
-    { id: 'images', label: 'Images' },
-    { id: 'contact', label: 'Contact' },
+    { id: 'basic',   label: t('admin.apartments.tab_basic')   },
+    { id: 'details', label: t('admin.apartments.tab_details') },
+    { id: 'images',  label: t('admin.apartments.tab_images')  },
+    { id: 'contact', label: t('admin.apartments.tab_contact') },
+  ];
+
+  const toggleFields = [
+    { key: 'wifi',             label: t('admin.apartments.wifi_toggle')      },
+    { key: 'airConditioning',  label: t('admin.apartments.ac_toggle')        },
+    { key: 'available',        label: t('admin.apartments.available_toggle') },
+    { key: 'featured',         label: t('admin.apartments.featured_toggle')  },
   ];
 
   return (
@@ -147,7 +161,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-dark-100 dark:border-dark-700 sticky top-0 bg-white dark:bg-dark-800 z-10">
           <h2 className="font-display font-semibold text-xl text-dark-900 dark:text-white">
-            {apartment ? 'Edit Apartment' : 'Add New Apartment'}
+            {apartment ? t('admin.apartments.edit_title') : t('admin.apartments.create_title')}
           </h2>
           <button onClick={onClose} id="close-apartment-modal" className="btn-ghost p-2"><X size={20} /></button>
         </div>
@@ -178,53 +192,122 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="label" htmlFor="apt-id">Apartment ID *</label>
+                    <label className="label" htmlFor="apt-id">{t('admin.apartments.id_label')}</label>
                     <div className="relative">
-                      <Hash size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-400" />
-                      <input id="apt-id" type="text" value={form.apartmentId} onChange={(e) => setForm({ ...form, apartmentId: e.target.value })} className="input pl-8 uppercase" placeholder="e.g. APT-001" required />
+                      <Hash
+                        size={14}
+                        className={`absolute top-1/2 -translate-y-1/2 text-dark-400 ${isRTL ? 'right-3' : 'left-3'}`}
+                      />
+                      <input
+                        id="apt-id"
+                        type="text"
+                        value={form.apartmentId}
+                        onChange={(e) => setForm({ ...form, apartmentId: e.target.value })}
+                        className={`input uppercase ${isRTL ? 'pr-8' : 'pl-8'}`}
+                        placeholder={t('admin.apartments.id_placeholder')}
+                        required
+                      />
                     </div>
                   </div>
                   <div>
-                    <label className="label" htmlFor="apt-district">District *</label>
+                    <label className="label" htmlFor="apt-district">{t('admin.apartments.district_label')}</label>
                     <div className="relative">
-                      <select id="apt-district" value={form.districtId} onChange={(e) => setForm({ ...form, districtId: e.target.value })} className="input appearance-none" required>
-                        <option value="">Select District</option>
+                      <select
+                        id="apt-district"
+                        value={form.districtId}
+                        onChange={(e) => setForm({ ...form, districtId: e.target.value })}
+                        className="input appearance-none"
+                        required
+                      >
+                        <option value="">{t('admin.apartments.select_district')}</option>
                         {districts.map((d) => <option key={d._id} value={d._id}>{d.name}</option>)}
                       </select>
-                      <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 pointer-events-none" />
+                      <ChevronDown
+                        size={14}
+                        className={`absolute top-1/2 -translate-y-1/2 text-dark-400 pointer-events-none ${isRTL ? 'left-3' : 'right-3'}`}
+                      />
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="label" htmlFor="apt-title">Title *</label>
-                  <input id="apt-title" type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="input" placeholder="e.g. Modern Studio Near Campus" required />
+                  <label className="label" htmlFor="apt-title">{t('admin.apartments.title_label')}</label>
+                  <input
+                    id="apt-title"
+                    type="text"
+                    value={form.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    className="input"
+                    placeholder={t('admin.apartments.title_placeholder')}
+                    required
+                  />
                 </div>
 
                 <div>
-                  <label className="label" htmlFor="apt-description">Description</label>
-                  <textarea id="apt-description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="input resize-none" rows={4} placeholder="Describe the apartment..." />
+                  <label className="label" htmlFor="apt-description">{t('admin.apartments.description_label')}</label>
+                  <textarea
+                    id="apt-description"
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    className="input resize-none"
+                    rows={4}
+                    placeholder={t('admin.apartments.description_placeholder')}
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="label" htmlFor="apt-building">Building Number *</label>
-                    <input id="apt-building" type="text" value={form.buildingNo} onChange={(e) => setForm({ ...form, buildingNo: e.target.value })} className="input" placeholder="e.g. 15A" required />
+                    <label className="label" htmlFor="apt-building">{t('admin.apartments.building_label')}</label>
+                    <input
+                      id="apt-building"
+                      type="text"
+                      value={form.buildingNo}
+                      onChange={(e) => setForm({ ...form, buildingNo: e.target.value })}
+                      className="input"
+                      placeholder={t('admin.apartments.building_placeholder')}
+                      required
+                    />
                   </div>
                   <div>
-                    <label className="label" htmlFor="apt-number">Apartment Number *</label>
-                    <input id="apt-number" type="text" value={form.apartmentNo} onChange={(e) => setForm({ ...form, apartmentNo: e.target.value })} className="input" placeholder="e.g. 402" required />
+                    <label className="label" htmlFor="apt-number">{t('admin.apartments.apt_number_label')}</label>
+                    <input
+                      id="apt-number"
+                      type="text"
+                      value={form.apartmentNo}
+                      onChange={(e) => setForm({ ...form, apartmentNo: e.target.value })}
+                      className="input"
+                      placeholder={t('admin.apartments.apt_number_placeholder')}
+                      required
+                    />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="label" htmlFor="apt-price">Price ($/mo) *</label>
-                    <input id="apt-price" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="input" placeholder="500" min="0" required />
+                    <label className="label" htmlFor="apt-price">{t('admin.apartments.price_label')}</label>
+                    <input
+                      id="apt-price"
+                      type="number"
+                      value={form.price}
+                      onChange={(e) => setForm({ ...form, price: e.target.value })}
+                      className="input"
+                      placeholder={t('admin.apartments.price_placeholder')}
+                      min="0"
+                      required
+                    />
                   </div>
                   <div>
-                    <label className="label" htmlFor="apt-rooms">Rooms *</label>
-                    <input id="apt-rooms" type="number" value={form.rooms} onChange={(e) => setForm({ ...form, rooms: e.target.value })} className="input" placeholder="1" min="1" required />
+                    <label className="label" htmlFor="apt-rooms">{t('admin.apartments.rooms_label')}</label>
+                    <input
+                      id="apt-rooms"
+                      type="number"
+                      value={form.rooms}
+                      onChange={(e) => setForm({ ...form, rooms: e.target.value })}
+                      className="input"
+                      placeholder={t('admin.apartments.rooms_placeholder')}
+                      min="1"
+                      required
+                    />
                   </div>
                 </div>
               </div>
@@ -235,34 +318,37 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="label" htmlFor="apt-capacity">Capacity (students)</label>
+                    <label className="label" htmlFor="apt-capacity">{t('admin.apartments.capacity_label')}</label>
                     <input id="apt-capacity" type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} className="input" min="1" />
                   </div>
                   <div>
-                    <label className="label" htmlFor="apt-available-beds">Available Beds</label>
+                    <label className="label" htmlFor="apt-available-beds">{t('admin.apartments.available_beds_label')}</label>
                     <input id="apt-available-beds" type="number" value={form.availableBeds} onChange={(e) => setForm({ ...form, availableBeds: e.target.value })} className="input" min="0" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="label" htmlFor="apt-gender">Gender Policy</label>
+                  <label className="label" htmlFor="apt-gender">{t('admin.apartments.gender_label')}</label>
                   <div className="relative">
-                    <select id="apt-gender" value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })} className="input appearance-none">
-                      <option value="male">Male Only</option>
-                      <option value="female">Female Only</option>
+                    <select
+                      id="apt-gender"
+                      value={form.gender}
+                      onChange={(e) => setForm({ ...form, gender: e.target.value })}
+                      className="input appearance-none"
+                    >
+                      <option value="male">{t('admin.apartments.male_only')}</option>
+                      <option value="female">{t('admin.apartments.female_only')}</option>
                     </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 pointer-events-none" />
+                    <ChevronDown
+                      size={14}
+                      className={`absolute top-1/2 -translate-y-1/2 text-dark-400 pointer-events-none ${isRTL ? 'left-3' : 'right-3'}`}
+                    />
                   </div>
                 </div>
 
                 {/* Toggles */}
                 <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { key: 'wifi', label: 'WiFi Included' },
-                    { key: 'airConditioning', label: 'Air Conditioning' },
-                    { key: 'available', label: 'Available for Rent' },
-                    { key: 'featured', label: 'Featured Listing' },
-                  ].map(({ key, label }) => (
+                  {toggleFields.map(({ key, label }) => (
                     <button
                       key={key}
                       type="button"
@@ -282,7 +368,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
                 {/* Amenities */}
                 <div>
-                  <label className="label">Amenities & Facilities</label>
+                  <label className="label">{t('admin.apartments.amenities_label')}</label>
                   <div className="flex gap-2 mb-2">
                     <input
                       type="text"
@@ -290,10 +376,12 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                       onChange={(e) => setAmenityInput(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addAmenity(); } }}
                       className="input flex-1"
-                      placeholder="Add amenity..."
+                      placeholder={t('admin.apartments.amenity_placeholder')}
                       id="amenity-input"
                     />
-                    <button type="button" onClick={() => addAmenity()} className="btn-secondary px-3">Add</button>
+                    <button type="button" onClick={() => addAmenity()} className="btn-secondary px-3">
+                      {t('admin.apartments.add_amenity')}
+                    </button>
                   </div>
                   {/* Suggestions */}
                   <div className="flex flex-wrap gap-1.5 mb-3">
@@ -326,10 +414,9 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
             {/* ── Images Tab ── */}
             {activeTab === 'images' && (
               <div className="space-y-4">
-                {/* Existing images */}
                 {existingImages.length > 0 && (
                   <div>
-                    <label className="label">Current Images ({existingImages.length})</label>
+                    <label className="label">{t('admin.apartments.current_images', { count: existingImages.length })}</label>
                     <div className="grid grid-cols-3 gap-2">
                       {existingImages.map((url, i) => (
                         <div key={i} className="relative group aspect-square rounded-xl overflow-hidden bg-dark-100 dark:bg-dark-700">
@@ -338,7 +425,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                             type="button"
                             onClick={() => removeExistingImage(i)}
                             id={`remove-existing-img-${i}`}
-                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                            className={`absolute top-1 ${isRTL ? 'left-1' : 'right-1'} bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600`}
                           >
                             <X size={12} />
                           </button>
@@ -348,16 +435,15 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                   </div>
                 )}
 
-                {/* New images upload */}
                 <div>
-                  <label className="label">Add New Images</label>
+                  <label className="label">{t('admin.apartments.add_images')}</label>
                   <div
                     className="border-2 border-dashed border-dark-200 dark:border-dark-600 rounded-xl p-6 cursor-pointer hover:border-primary-400 transition-colors text-center"
                     onClick={() => fileRef.current?.click()}
                   >
                     <Upload size={28} className="text-dark-400 mx-auto mb-2" />
-                    <p className="text-sm text-dark-500 dark:text-dark-400">Click to upload images</p>
-                    <p className="text-xs text-dark-400 mt-1">Multiple files supported, up to 10MB each</p>
+                    <p className="text-sm text-dark-500 dark:text-dark-400">{t('admin.apartments.upload_click')}</p>
+                    <p className="text-xs text-dark-400 mt-1">{t('admin.apartments.upload_hint')}</p>
                   </div>
                   <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageChange} id="apartment-image-upload" />
 
@@ -366,11 +452,13 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                       {newPreviews.map((src, i) => (
                         <div key={i} className="relative group aspect-square rounded-xl overflow-hidden bg-dark-100 dark:bg-dark-700">
                           <img src={src} alt={`New ${i + 1}`} className="w-full h-full object-cover" />
-                          <div className="absolute top-1 left-1 bg-primary-500 text-white text-xs rounded px-1.5 py-0.5">New</div>
+                          <div className={`absolute top-1 ${isRTL ? 'right-1' : 'left-1'} bg-primary-500 text-white text-xs rounded px-1.5 py-0.5`}>
+                            {t('admin.apartments.new_badge')}
+                          </div>
                           <button
                             type="button"
                             onClick={() => removeNewImage(i)}
-                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                            className={`absolute top-1 ${isRTL ? 'left-1' : 'right-1'} bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600`}
                           >
                             <X size={12} />
                           </button>
@@ -386,17 +474,17 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
             {activeTab === 'contact' && (
               <div className="space-y-4">
                 <div>
-                  <label className="label" htmlFor="contact-phone">Phone Number</label>
-                  <input id="contact-phone" type="tel" value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} className="input" placeholder="+1 234 567 8900" />
+                  <label className="label" htmlFor="contact-phone">{t('admin.apartments.phone_label')}</label>
+                  <input id="contact-phone" type="tel" value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} className="input" placeholder={t('admin.apartments.phone_placeholder')} />
                 </div>
                 <div>
-                  <label className="label" htmlFor="contact-whatsapp">WhatsApp Number</label>
-                  <input id="contact-whatsapp" type="tel" value={form.contactWhatsapp} onChange={(e) => setForm({ ...form, contactWhatsapp: e.target.value })} className="input" placeholder="+1 234 567 8900" />
-                  <p className="text-xs text-dark-400 mt-1">Include country code (e.g. +1)</p>
+                  <label className="label" htmlFor="contact-whatsapp">{t('admin.apartments.whatsapp_label')}</label>
+                  <input id="contact-whatsapp" type="tel" value={form.contactWhatsapp} onChange={(e) => setForm({ ...form, contactWhatsapp: e.target.value })} className="input" placeholder={t('admin.apartments.whatsapp_placeholder')} />
+                  <p className="text-xs text-dark-400 mt-1">{t('admin.apartments.whatsapp_hint')}</p>
                 </div>
                 <div>
-                  <label className="label" htmlFor="contact-email">Email Address</label>
-                  <input id="contact-email" type="email" value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })} className="input" placeholder="landlord@email.com" />
+                  <label className="label" htmlFor="contact-email">{t('admin.apartments.email_label')}</label>
+                  <input id="contact-email" type="email" value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })} className="input" placeholder={t('admin.apartments.email_placeholder')} />
                 </div>
               </div>
             )}
@@ -404,9 +492,14 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
           {/* Footer Actions */}
           <div className="flex gap-3 p-6 border-t border-dark-100 dark:border-dark-700 sticky bottom-0 bg-white dark:bg-dark-800">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">Cancel</button>
+            <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">
+              {t('admin.apartments.cancel')}
+            </button>
             <button type="submit" disabled={loading} id="save-apartment" className="btn-primary flex-1 justify-center">
-              {loading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : apartment ? 'Save Changes' : 'Create Apartment'}
+              {loading
+                ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                : apartment ? t('admin.apartments.save') : t('admin.apartments.create')
+              }
             </button>
           </div>
         </form>
@@ -428,6 +521,10 @@ const AdminApartments = () => {
   const [editingApartment, setEditingApartment] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
+
+  const BackIcon = isRTL ? ChevronRight : ChevronLeft;
 
   const fetchAll = async (page = 1, searchStr = search) => {
     setLoading(true);
@@ -464,11 +561,11 @@ const AdminApartments = () => {
     setDeleting(true);
     try {
       await apartmentAPI.delete(apt._id);
-      toast.success('Apartment deleted!');
+      toast.success(t('admin.apartments.deleted'));
       setDeleteConfirm(null);
       fetchAll(currentPage, search);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Delete failed.');
+      toast.error(err.response?.data?.message || t('admin.apartments.delete_failed'));
     } finally {
       setDeleting(false);
     }
@@ -477,20 +574,20 @@ const AdminApartments = () => {
   const handleToggleFeatured = async (apt) => {
     try {
       await apartmentAPI.toggleFeatured(apt._id);
-      toast.success(apt.featured ? 'Removed from featured.' : 'Marked as featured!');
+      toast.success(apt.featured ? t('admin.apartments.featured_removed') : t('admin.apartments.featured_added'));
       fetchAll(currentPage, search);
     } catch {
-      toast.error('Failed to update.');
+      toast.error(t('admin.apartments.update_failed'));
     }
   };
 
   const handleToggleAvailable = async (apt) => {
     try {
       await apartmentAPI.toggleAvailable(apt._id);
-      toast.success(`Marked as ${apt.available ? 'unavailable' : 'available'}.`);
+      toast.success(apt.available ? t('admin.apartments.marked_unavailable') : t('admin.apartments.marked_available'));
       fetchAll(currentPage, search);
     } catch {
-      toast.error('Failed to update.');
+      toast.error(t('admin.apartments.update_failed'));
     }
   };
 
@@ -505,35 +602,42 @@ const AdminApartments = () => {
         <div className="page-container py-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Link to="/admin" className="btn-ghost p-2"><ChevronLeft size={18} /></Link>
+              <Link to="/admin" className="btn-ghost p-2"><BackIcon size={18} /></Link>
               <div className="w-10 h-10 rounded-xl bg-primary-500/10 flex items-center justify-center">
                 <Building2 size={20} className="text-primary-500" />
               </div>
               <div>
-                <h1 className="font-display font-bold text-xl text-dark-900 dark:text-white">Apartments</h1>
-                <p className="text-xs text-dark-400">{pagination.total ?? 0} total apartments</p>
+                <h1 className="font-display font-bold text-xl text-dark-900 dark:text-white">
+                  {t('admin.apartments.title')}
+                </h1>
+                <p className="text-xs text-dark-400">
+                  {t('admin.apartments.count_other', { count: pagination.total ?? 0 })}
+                </p>
               </div>
             </div>
             <button onClick={openCreate} id="add-apartment-btn" className="btn-primary">
-              <Plus size={16} /> Add Apartment
+              <Plus size={16} /> {t('admin.apartments.add_btn')}
             </button>
           </div>
 
           {/* Search */}
           <form onSubmit={handleSearch} className="mt-4 flex gap-2 max-w-sm">
             <div className="relative flex-1">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-400" />
+              <Search
+                size={15}
+                className={`absolute top-1/2 -translate-y-1/2 text-dark-400 ${isRTL ? 'right-3' : 'left-3'}`}
+              />
               <input
                 id="admin-search-apartments"
                 type="text"
-                placeholder="Search by ID..."
+                placeholder={t('admin.apartments.search_placeholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="input pl-9 py-2 text-sm"
+                className={`input py-2 text-sm ${isRTL ? 'pr-9' : 'pl-9'}`}
               />
             </div>
             <button type="submit" className="btn-secondary py-2 px-4 text-sm">
-              <Filter size={14} /> Filter
+              <Filter size={14} /> {t('admin.apartments.filter_btn')}
             </button>
           </form>
         </div>
@@ -546,11 +650,21 @@ const AdminApartments = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-dark-100 dark:border-dark-700 bg-dark-50 dark:bg-dark-700/50">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-dark-500 uppercase tracking-wider">Apartment</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-dark-500 uppercase tracking-wider hidden sm:table-cell">District</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-dark-500 uppercase tracking-wider hidden md:table-cell">Price</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-dark-500 uppercase tracking-wider hidden lg:table-cell">Status</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-dark-500 uppercase tracking-wider">Actions</th>
+                  <th className="text-start px-4 py-3 text-xs font-semibold text-dark-500 uppercase tracking-wider">
+                    {t('admin.apartments.col_apartment')}
+                  </th>
+                  <th className="text-start px-4 py-3 text-xs font-semibold text-dark-500 uppercase tracking-wider hidden sm:table-cell">
+                    {t('admin.apartments.col_district')}
+                  </th>
+                  <th className="text-start px-4 py-3 text-xs font-semibold text-dark-500 uppercase tracking-wider hidden md:table-cell">
+                    {t('admin.apartments.col_price')}
+                  </th>
+                  <th className="text-start px-4 py-3 text-xs font-semibold text-dark-500 uppercase tracking-wider hidden lg:table-cell">
+                    {t('admin.apartments.col_status')}
+                  </th>
+                  <th className="text-end px-4 py-3 text-xs font-semibold text-dark-500 uppercase tracking-wider">
+                    {t('admin.apartments.col_actions')}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-dark-100 dark:divide-dark-700">
@@ -561,16 +675,16 @@ const AdminApartments = () => {
                       <td className="px-4 py-3 hidden sm:table-cell"><div className="shimmer h-4 rounded w-24" /></td>
                       <td className="px-4 py-3 hidden md:table-cell"><div className="shimmer h-4 rounded w-16" /></td>
                       <td className="px-4 py-3 hidden lg:table-cell"><div className="shimmer h-6 rounded-full w-20" /></td>
-                      <td className="px-4 py-3"><div className="shimmer h-8 rounded-lg w-24 ml-auto" /></td>
+                      <td className="px-4 py-3"><div className="shimmer h-8 rounded-lg w-24 ms-auto" /></td>
                     </tr>
                   ))
                 ) : apartments.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-4 py-16 text-center text-dark-400">
                       <Building2 size={36} className="mx-auto mb-2 text-dark-300 dark:text-dark-600" />
-                      <p>No apartments found.</p>
+                      <p>{t('admin.apartments.no_apartments')}</p>
                       <button onClick={openCreate} className="btn-primary mt-4">
-                        <Plus size={15} /> Add First Apartment
+                        <Plus size={15} /> {t('admin.apartments.add_first')}
                       </button>
                     </td>
                   </tr>
@@ -609,7 +723,7 @@ const AdminApartments = () => {
                             className={apt.available ? 'badge-available cursor-pointer hover:opacity-75 transition-opacity' : 'badge-unavailable cursor-pointer hover:opacity-75 transition-opacity'}
                           >
                             {apt.available ? <CheckCircle size={11} /> : <XCircle size={11} />}
-                            {apt.available ? 'Available' : 'Unavailable'}
+                            {apt.available ? t('admin.apartments.available') : t('admin.apartments.unavailable')}
                           </button>
                           <button
                             onClick={() => handleToggleFeatured(apt)}
@@ -623,10 +737,20 @@ const AdminApartments = () => {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => openEdit(apt)} id={`edit-apt-${apt._id}`} className="p-1.5 rounded-lg text-dark-500 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all" title="Edit">
+                          <button
+                            onClick={() => openEdit(apt)}
+                            id={`edit-apt-${apt._id}`}
+                            className="p-1.5 rounded-lg text-dark-500 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all"
+                            title="Edit"
+                          >
                             <Edit size={15} />
                           </button>
-                          <button onClick={() => setDeleteConfirm(apt)} id={`delete-apt-${apt._id}`} className="p-1.5 rounded-lg text-dark-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all" title="Delete">
+                          <button
+                            onClick={() => setDeleteConfirm(apt)}
+                            id={`delete-apt-${apt._id}`}
+                            className="p-1.5 rounded-lg text-dark-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                            title="Delete"
+                          >
                             <Trash2 size={15} />
                           </button>
                         </div>
@@ -642,7 +766,12 @@ const AdminApartments = () => {
         {/* Pagination */}
         {pagination.totalPages > 1 && (
           <div className="flex items-center justify-between mt-4 text-sm text-dark-500">
-            <span>Showing {apartments.length} of {pagination.total}</span>
+            <span>
+              {t('admin.apartments.showing', {
+                shown: apartments.length,
+                total: pagination.total,
+              })}
+            </span>
             <div className="flex gap-1">
               {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
                 <button
@@ -688,19 +817,28 @@ const AdminApartments = () => {
                 <div className="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <AlertCircle size={28} className="text-red-500" />
                 </div>
-                <h3 className="font-display font-bold text-xl text-dark-900 dark:text-white mb-2">Delete Apartment?</h3>
+                <h3 className="font-display font-bold text-xl text-dark-900 dark:text-white mb-2">
+                  {t('admin.apartments.delete_title')}
+                </h3>
                 <p className="text-dark-500 dark:text-dark-400 text-sm mb-6">
-                  Are you sure you want to delete <strong>"{deleteConfirm.title}"</strong>? All images will be permanently removed.
+                  {t('admin.apartments.delete_confirm')}{' '}
+                  <strong>"{deleteConfirm.title}"</strong>?{' '}
+                  {t('admin.apartments.delete_warning')}
                 </p>
                 <div className="flex gap-3">
-                  <button onClick={() => setDeleteConfirm(null)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                  <button onClick={() => setDeleteConfirm(null)} className="btn-secondary flex-1 justify-center">
+                    {t('admin.apartments.cancel')}
+                  </button>
                   <button
                     onClick={() => handleDelete(deleteConfirm)}
                     disabled={deleting}
                     id="confirm-delete-apartment"
                     className="btn-danger flex-1 justify-center"
                   >
-                    {deleting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Delete'}
+                    {deleting
+                      ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      : t('common.delete')
+                    }
                   </button>
                 </div>
               </div>

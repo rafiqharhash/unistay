@@ -1,6 +1,11 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../../context/LanguageContext';
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
+
   if (totalPages <= 1) return null;
 
   const pages = [];
@@ -16,16 +21,24 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     pages.push(i);
   }
 
+  // In RTL, "previous" goes right and "next" goes left, so we flip the icons
+  const PrevIcon = isRTL ? ChevronRight : ChevronLeft;
+  const NextIcon = isRTL ? ChevronLeft : ChevronRight;
+
   return (
-    <div className="flex items-center justify-center gap-1 mt-8" role="navigation" aria-label="Pagination">
+    <div
+      className="flex items-center justify-center gap-1 mt-8"
+      role="navigation"
+      aria-label={isRTL ? 'التنقل بين الصفحات' : 'Pagination'}
+    >
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className="btn-ghost p-2 disabled:opacity-30 disabled:cursor-not-allowed"
-        aria-label="Previous page"
+        aria-label={t('pagination.prev')}
         id="pagination-prev"
       >
-        <ChevronLeft size={18} />
+        <PrevIcon size={18} />
       </button>
 
       {startPage > 1 && (
@@ -80,10 +93,10 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         className="btn-ghost p-2 disabled:opacity-30 disabled:cursor-not-allowed"
-        aria-label="Next page"
+        aria-label={t('pagination.next')}
         id="pagination-next"
       >
-        <ChevronRight size={18} />
+        <NextIcon size={18} />
       </button>
     </div>
   );

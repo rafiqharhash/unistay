@@ -2,22 +2,25 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  ArrowLeft, MapPin, BedDouble, Users, Wifi, Wind, Phone, Mail,
+  ArrowLeft, ArrowRight, MapPin, BedDouble, Users, Wifi, Wind, Phone, Mail,
   MessageCircle, CheckCircle, XCircle, Star, Hash, Calendar,
-  ExternalLink, AlertCircle, Share2
+  ExternalLink, AlertCircle, Share2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../context/LanguageContext';
 import { apartmentAPI } from '../api/axios';
 import ImageCarousel from '../components/apartment/ImageCarousel';
 
+const formatDate = (dateStr, lang) =>
+  new Date(dateStr).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
 const formatPrice = (price) =>
   new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(price);
-
-const formatDate = (dateStr) =>
-  new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-
-const genderLabel = { male: 'Male Only', female: 'Female Only' };
-const genderClass = { male: 'badge-male', female: 'badge-female' };
 
 const InfoChip = ({ icon: Icon, label, value, color = 'text-primary-500' }) => (
   <div className="flex items-center gap-3 p-3 bg-dark-50 dark:bg-dark-700/50 rounded-xl">
@@ -33,9 +36,13 @@ const InfoChip = ({ icon: Icon, label, value, color = 'text-primary-500' }) => (
 
 const ApartmentDetail = () => {
   const { id } = useParams();
+  const { t } = useTranslation();
+  const { isRTL, language } = useLanguage();
   const [apartment, setApartment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const BackIcon = isRTL ? ArrowRight : ArrowLeft;
 
   useEffect(() => {
     setLoading(true);
@@ -44,9 +51,9 @@ const ApartmentDetail = () => {
         setApartment(res.data.data);
         document.title = `${res.data.data.title} - UniStay`;
       })
-      .catch(() => setError('Apartment not found.'))
+      .catch(() => setError(t('apartment.not_found_title')))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, t]);
 
   const handleShare = async () => {
     try {
@@ -54,7 +61,7 @@ const ApartmentDetail = () => {
         await navigator.share({ title: apartment?.title, url: window.location.href });
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        toast.success('Link copied to clipboard!');
+        toast.success(t('apartment.link_copied'));
       }
     } catch (_) {}
   };
@@ -83,40 +90,57 @@ const ApartmentDetail = () => {
     return (
       <div className="page-container py-20 text-center">
         <AlertCircle size={48} className="text-red-500 mx-auto mb-4" />
-        <h1 className="section-title mb-2">Apartment Not Found</h1>
+        <h1 className="section-title mb-2">{t('apartment.not_found_title')}</h1>
         <p className="text-dark-500 mb-6">{error}</p>
-        <Link to="/" className="btn-primary">Go Home</Link>
+        <Link to="/" className="btn-primary">{t('common.go_home')}</Link>
       </div>
     );
   }
+
+  const genderLabel = apartment.gender === 'male'
+    ? t('apartment.male_only')
+    : apartment.gender === 'female'
+    ? t('apartment.female_only')
+    : null;
 
   return (
     <div className="animate-fade-in">
       {/* Breadcrumb */}
       <div className="bg-white dark:bg-dark-800 border-b border-dark-100 dark:border-dark-700">
-        <div className="page-container py-4 flex items-center gap-2 text-sm">
-          <Link to="/" className="text-dark-500 hover:text-primary-500 transition-colors">Home</Link>
+        <div className="page-container py-4 flex items-center gap-2 text-sm flex-wrap">
+          <Link to="/" className="text-dark-500 hover:text-primary-500 transition-colors">
+            {t('apartment.home_breadcrumb')}
+          </Link>
           <span className="text-dark-300">/</span>
           {apartment.districtId && (
             <>
-              <Link to={`/districts/${apartment.districtId._id}`} className="text-dark-500 hover:text-primary-500 transition-colors">
+              <Link
+                to={`/districts/${apartment.districtId._id}`}
+                className="text-dark-500 hover:text-primary-500 transition-colors"
+              >
                 {apartment.districtId.name}
               </Link>
               <span className="text-dark-300">/</span>
             </>
           )}
-          <span className="text-dark-900 dark:text-white font-medium truncate max-w-xs">{apartment.title}</span>
+          <span className="text-dark-900 dark:text-white font-medium truncate max-w-xs">
+            {apartment.title}
+          </span>
         </div>
       </div>
 
       <div className="page-container py-8">
         {/* Back + Share */}
         <div className="flex items-center justify-between mb-6">
-          <Link to={apartment.districtId ? `/districts/${apartment.districtId._id}` : '/'} className="btn-ghost" id="back-district">
-            <ArrowLeft size={16} /> Back
+          <Link
+            to={apartment.districtId ? `/districts/${apartment.districtId._id}` : '/'}
+            className="btn-ghost"
+            id="back-district"
+          >
+            <BackIcon size={16} /> {t('apartment.back')}
           </Link>
           <button onClick={handleShare} id="share-apartment" className="btn-secondary">
-            <Share2 size={15} /> Share
+            <Share2 size={15} /> {t('apartment.share')}
           </button>
         </div>
 
@@ -132,16 +156,16 @@ const ApartmentDetail = () => {
                 <div className="flex flex-wrap gap-2">
                   <span className={apartment.available ? 'badge-available' : 'badge-unavailable'}>
                     {apartment.available ? <CheckCircle size={11} /> : <XCircle size={11} />}
-                    {apartment.available ? 'Available' : 'Unavailable'}
+                    {apartment.available ? t('apartment.available') : t('apartment.unavailable')}
                   </span>
                   {apartment.featured && (
                     <span className="badge-featured">
-                      <Star size={11} fill="currentColor" /> Featured
+                      <Star size={11} fill="currentColor" /> {t('apartment.featured_label')}
                     </span>
                   )}
-                  {genderLabel[apartment.gender] && (
-                    <span className={genderClass[apartment.gender]}>
-                      {genderLabel[apartment.gender]}
+                  {genderLabel && (
+                    <span className={apartment.gender === 'male' ? 'badge-male' : 'badge-female'}>
+                      {genderLabel}
                     </span>
                   )}
                 </div>
@@ -158,7 +182,10 @@ const ApartmentDetail = () => {
               <div className="flex items-center gap-2 text-dark-500 dark:text-dark-400 text-sm">
                 <MapPin size={14} className="text-primary-500 shrink-0" />
                 <span>
-                  Building {apartment.buildingNo}, Apt {apartment.apartmentNo}
+                  {t('apartment.building_apt', {
+                    building: apartment.buildingNo,
+                    apt: apartment.apartmentNo,
+                  })}
                   {apartment.districtId ? `, ${apartment.districtId.name}` : ''}
                 </span>
               </div>
@@ -166,10 +193,28 @@ const ApartmentDetail = () => {
 
             {/* Info Chips */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <InfoChip icon={BedDouble} label="Rooms" value={`${apartment.rooms} room${apartment.rooms !== 1 ? 's' : ''}`} />
-              <InfoChip icon={Users} label="Capacity" value={`${apartment.capacity} student${apartment.capacity !== 1 ? 's' : ''}`} />
-              <InfoChip icon={Wifi} label="WiFi" value={apartment.wifi ? 'Included' : 'Not included'} color={apartment.wifi ? 'text-emerald-500' : 'text-dark-400'} />
-              <InfoChip icon={Wind} label="A/C" value={apartment.airConditioning ? 'Available' : 'Not available'} color={apartment.airConditioning ? 'text-blue-500' : 'text-dark-400'} />
+              <InfoChip
+                icon={BedDouble}
+                label={t('apartment.rooms_label')}
+                value={t('apartment.room_one', { count: apartment.rooms })}
+              />
+              <InfoChip
+                icon={Users}
+                label={t('apartment.capacity_label')}
+                value={t('apartment.student_one', { count: apartment.capacity })}
+              />
+              <InfoChip
+                icon={Wifi}
+                label={t('apartment.wifi_label')}
+                value={apartment.wifi ? t('apartment.wifi_included') : t('apartment.wifi_not_included')}
+                color={apartment.wifi ? 'text-emerald-500' : 'text-dark-400'}
+              />
+              <InfoChip
+                icon={Wind}
+                label={t('apartment.ac_label')}
+                value={apartment.airConditioning ? t('apartment.ac_available') : t('apartment.ac_not_available')}
+                color={apartment.airConditioning ? 'text-blue-500' : 'text-dark-400'}
+              />
             </div>
 
             {/* Available Beds */}
@@ -178,7 +223,7 @@ const ApartmentDetail = () => {
                 <BedDouble size={20} className="text-emerald-600 dark:text-emerald-400" />
                 <div>
                   <p className="font-semibold text-emerald-800 dark:text-emerald-300 text-sm">
-                    {apartment.availableBeds} bed{apartment.availableBeds !== 1 ? 's' : ''} currently available
+                    {t('apartment.beds_available_other', { count: apartment.availableBeds })}
                   </p>
                 </div>
               </div>
@@ -187,7 +232,9 @@ const ApartmentDetail = () => {
             {/* Description */}
             {apartment.description && (
               <div>
-                <h2 className="font-display font-semibold text-lg text-dark-900 dark:text-white mb-3">Description</h2>
+                <h2 className="font-display font-semibold text-lg text-dark-900 dark:text-white mb-3">
+                  {t('apartment.description_title')}
+                </h2>
                 <p className="text-dark-600 dark:text-dark-300 leading-relaxed whitespace-pre-line">
                   {apartment.description}
                 </p>
@@ -198,11 +245,14 @@ const ApartmentDetail = () => {
             {apartment.amenities?.length > 0 && (
               <div>
                 <h2 className="font-display font-semibold text-lg text-dark-900 dark:text-white mb-3">
-                  Facilities & Amenities
+                  {t('apartment.amenities_title')}
                 </h2>
                 <div className="flex flex-wrap gap-2">
                   {apartment.amenities.map((amenity) => (
-                    <span key={amenity} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-xl text-sm font-medium">
+                    <span
+                      key={amenity}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-xl text-sm font-medium"
+                    >
                       <CheckCircle size={13} />
                       {amenity}
                     </span>
@@ -211,12 +261,10 @@ const ApartmentDetail = () => {
               </div>
             )}
 
-
-
             {/* Meta */}
             <div className="flex items-center gap-2 text-xs text-dark-400 dark:text-dark-500">
               <Calendar size={12} />
-              Listed on {formatDate(apartment.createdAt)}
+              {t('apartment.listed_on', { date: formatDate(apartment.createdAt, language) })}
             </div>
           </div>
 
@@ -225,17 +273,19 @@ const ApartmentDetail = () => {
             {/* Price Card */}
             <div className="card p-6 sticky top-20">
               <div className="text-center mb-5">
-                <p className="text-xs text-dark-400 uppercase tracking-wider mb-1">Monthly Rent</p>
+                <p className="text-xs text-dark-400 uppercase tracking-wider mb-1">
+                  {t('apartment.monthly_rent')}
+                </p>
                 <p className="font-display font-bold text-4xl text-primary-500">
                   {formatPrice(apartment.price)}
                 </p>
-                <p className="text-dark-400 text-sm">per month</p>
+                <p className="text-dark-400 text-sm">{t('apartment.per_month')}</p>
               </div>
 
               {/* District */}
               {apartment.districtId && (
                 <div className="flex items-center justify-between py-3 border-t border-dark-100 dark:border-dark-700">
-                  <span className="text-sm text-dark-500">District</span>
+                  <span className="text-sm text-dark-500">{t('apartment.district_label')}</span>
                   <Link
                     to={`/districts/${apartment.districtId._id}`}
                     className="text-sm font-medium text-primary-500 hover:text-primary-600 transition-colors"
@@ -246,16 +296,18 @@ const ApartmentDetail = () => {
               )}
 
               <div className="flex items-center justify-between py-3 border-t border-dark-100 dark:border-dark-700">
-                <span className="text-sm text-dark-500">Status</span>
+                <span className="text-sm text-dark-500">{t('apartment.status_label')}</span>
                 <span className={apartment.available ? 'badge-available' : 'badge-unavailable'}>
-                  {apartment.available ? 'Available' : 'Unavailable'}
+                  {apartment.available ? t('apartment.available') : t('apartment.unavailable')}
                 </span>
               </div>
 
               {/* Contact Section */}
               {(apartment.contactInfo?.phone || apartment.contactInfo?.email || apartment.contactInfo?.whatsapp) && (
                 <div className="mt-5 pt-5 border-t border-dark-100 dark:border-dark-700">
-                  <h3 className="font-semibold text-dark-800 dark:text-dark-200 mb-3 text-sm">Contact Landlord</h3>
+                  <h3 className="font-semibold text-dark-800 dark:text-dark-200 mb-3 text-sm">
+                    {t('apartment.contact_landlord')}
+                  </h3>
                   <div className="space-y-2">
                     {apartment.contactInfo.phone && (
                       <a
@@ -265,8 +317,10 @@ const ApartmentDetail = () => {
                       >
                         <Phone size={16} className="text-primary-500" />
                         <div>
-                          <p className="text-xs text-dark-400">Phone</p>
-                          <p className="text-sm font-medium text-dark-800 dark:text-dark-100 group-hover:text-primary-600">{apartment.contactInfo.phone}</p>
+                          <p className="text-xs text-dark-400">{t('apartment.phone_label')}</p>
+                          <p className="text-sm font-medium text-dark-800 dark:text-dark-100 group-hover:text-primary-600">
+                            {apartment.contactInfo.phone}
+                          </p>
                         </div>
                       </a>
                     )}
@@ -280,8 +334,12 @@ const ApartmentDetail = () => {
                       >
                         <MessageCircle size={16} className="text-emerald-500" />
                         <div>
-                          <p className="text-xs text-emerald-600 dark:text-emerald-400">WhatsApp</p>
-                          <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">{apartment.contactInfo.whatsapp}</p>
+                          <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                            {t('apartment.whatsapp_label')}
+                          </p>
+                          <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                            {apartment.contactInfo.whatsapp}
+                          </p>
                         </div>
                       </a>
                     )}
@@ -293,8 +351,10 @@ const ApartmentDetail = () => {
                       >
                         <Mail size={16} className="text-primary-500" />
                         <div>
-                          <p className="text-xs text-dark-400">Email</p>
-                          <p className="text-sm font-medium text-dark-800 dark:text-dark-100 group-hover:text-primary-600">{apartment.contactInfo.email}</p>
+                          <p className="text-xs text-dark-400">{t('apartment.email_label')}</p>
+                          <p className="text-sm font-medium text-dark-800 dark:text-dark-100 group-hover:text-primary-600">
+                            {apartment.contactInfo.email}
+                          </p>
                         </div>
                       </a>
                     )}

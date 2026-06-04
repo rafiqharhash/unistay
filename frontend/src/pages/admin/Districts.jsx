@@ -3,12 +3,16 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Edit, Trash2, X, Upload, MapPin, Building2,
-  ChevronLeft, AlertCircle, Image as ImageIcon
+  ChevronLeft, ChevronRight, AlertCircle, Image as ImageIcon,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../../context/LanguageContext';
 import { districtAPI } from '../../api/axios';
 
 const DistrictModal = ({ district, onClose, onSaved }) => {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const [form, setForm] = useState({
     name: district?.name || '',
     description: district?.description || '',
@@ -22,14 +26,14 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { toast.error('Please select an image file.'); return; }
+    if (!file.type.startsWith('image/')) { toast.error(t('admin.districts.not_image')); return; }
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim()) { toast.error('District name is required.'); return; }
+    if (!form.name.trim()) { toast.error(t('admin.districts.name_required')); return; }
     setLoading(true);
     try {
       const fd = new FormData();
@@ -40,14 +44,14 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
 
       if (district) {
         await districtAPI.update(district._id, fd);
-        toast.success('District updated!');
+        toast.success(t('admin.districts.updated'));
       } else {
         await districtAPI.create(fd);
-        toast.success('District created!');
+        toast.success(t('admin.districts.created'));
       }
       onSaved();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Operation failed.');
+      toast.error(err.response?.data?.message || t('admin.districts.op_failed'));
     } finally {
       setLoading(false);
     }
@@ -65,7 +69,7 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-dark-100 dark:border-dark-700">
           <h2 className="font-display font-semibold text-xl text-dark-900 dark:text-white">
-            {district ? 'Edit District' : 'Add New District'}
+            {district ? t('admin.districts.edit_title') : t('admin.districts.create_title')}
           </h2>
           <button onClick={onClose} id="close-district-modal" className="btn-ghost p-2">
             <X size={20} />
@@ -75,48 +79,48 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Name */}
           <div>
-            <label className="label" htmlFor="district-name">District Name *</label>
+            <label className="label" htmlFor="district-name">{t('admin.districts.name_label')}</label>
             <input
               id="district-name"
               type="text"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               className="input"
-              placeholder="e.g., Downtown"
+              placeholder={t('admin.districts.name_placeholder')}
               required
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="label" htmlFor="district-description">Description</label>
+            <label className="label" htmlFor="district-description">{t('admin.districts.description_label')}</label>
             <textarea
               id="district-description"
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               className="input resize-none"
               rows={3}
-              placeholder="Brief description of the district..."
+              placeholder={t('admin.districts.description_placeholder')}
             />
           </div>
 
           {/* Google Maps URL */}
           <div>
-            <label className="label" htmlFor="district-maps">Google Maps Embed URL</label>
+            <label className="label" htmlFor="district-maps">{t('admin.districts.maps_label')}</label>
             <input
               id="district-maps"
               type="url"
               value={form.googleMapsUrl}
               onChange={(e) => setForm({ ...form, googleMapsUrl: e.target.value })}
               className="input"
-              placeholder="https://www.google.com/maps/embed?..."
+              placeholder={t('admin.districts.maps_placeholder')}
             />
-            <p className="text-xs text-dark-400 mt-1">Paste the embed URL from Google Maps (Share → Embed a map → Copy HTML, then use the src value)</p>
+            <p className="text-xs text-dark-400 mt-1">{t('admin.districts.maps_hint')}</p>
           </div>
 
           {/* Cover Image */}
           <div>
-            <label className="label">Cover Image</label>
+            <label className="label">{t('admin.districts.cover_label')}</label>
             <div
               className="border-2 border-dashed border-dark-200 dark:border-dark-600 rounded-xl p-4 cursor-pointer hover:border-primary-400 transition-colors"
               onClick={() => fileRef.current?.click()}
@@ -127,7 +131,7 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setImageFile(null); setImagePreview(''); }}
-                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                    className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors`}
                   >
                     <X size={14} />
                   </button>
@@ -135,8 +139,8 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
               ) : (
                 <div className="flex flex-col items-center gap-2 py-4">
                   <Upload size={28} className="text-dark-400" />
-                  <p className="text-sm text-dark-500 dark:text-dark-400">Click to upload cover image</p>
-                  <p className="text-xs text-dark-400">PNG, JPG up to 10MB</p>
+                  <p className="text-sm text-dark-500 dark:text-dark-400">{t('admin.districts.upload_click')}</p>
+                  <p className="text-xs text-dark-400">{t('admin.districts.upload_hint')}</p>
                 </div>
               )}
             </div>
@@ -145,9 +149,14 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
 
           {/* Actions */}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">Cancel</button>
+            <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">
+              {t('admin.districts.cancel')}
+            </button>
             <button type="submit" disabled={loading} id="save-district" className="btn-primary flex-1 justify-center">
-              {loading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : district ? 'Save Changes' : 'Create District'}
+              {loading
+                ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                : district ? t('admin.districts.save') : t('admin.districts.create')
+              }
             </button>
           </div>
         </form>
@@ -163,6 +172,10 @@ const AdminDistricts = () => {
   const [editingDistrict, setEditingDistrict] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
+
+  const BackIcon = isRTL ? ChevronRight : ChevronLeft;
 
   const fetchDistricts = async () => {
     setLoading(true);
@@ -183,11 +196,11 @@ const AdminDistricts = () => {
     setDeleting(true);
     try {
       await districtAPI.delete(district._id);
-      toast.success('District deleted successfully.');
+      toast.success(t('admin.districts.deleted'));
       setDeleteConfirm(null);
       fetchDistricts();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Delete failed.');
+      toast.error(err.response?.data?.message || t('admin.districts.delete_failed'));
     } finally {
       setDeleting(false);
     }
@@ -204,17 +217,21 @@ const AdminDistricts = () => {
         <div className="page-container py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Link to="/admin" className="btn-ghost p-2"><ChevronLeft size={18} /></Link>
+              <Link to="/admin" className="btn-ghost p-2"><BackIcon size={18} /></Link>
               <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
                 <MapPin size={20} className="text-indigo-500" />
               </div>
               <div>
-                <h1 className="font-display font-bold text-xl text-dark-900 dark:text-white">Districts</h1>
-                <p className="text-xs text-dark-400">{districts.length} districts total</p>
+                <h1 className="font-display font-bold text-xl text-dark-900 dark:text-white">
+                  {t('admin.districts.title')}
+                </h1>
+                <p className="text-xs text-dark-400">
+                  {t('admin.districts.count_other', { count: districts.length })}
+                </p>
               </div>
             </div>
             <button onClick={openCreate} id="add-district-btn" className="btn-primary">
-              <Plus size={16} /> Add District
+              <Plus size={16} /> {t('admin.districts.add_btn')}
             </button>
           </div>
         </div>
@@ -236,9 +253,11 @@ const AdminDistricts = () => {
         ) : districts.length === 0 ? (
           <div className="text-center py-20">
             <MapPin size={48} className="text-dark-300 dark:text-dark-600 mx-auto mb-4" />
-            <h2 className="font-display font-semibold text-xl text-dark-700 dark:text-dark-300 mb-2">No Districts Yet</h2>
-            <p className="text-dark-500 text-sm mb-6">Create your first district to get started.</p>
-            <button onClick={openCreate} className="btn-primary"><Plus size={16} /> Add District</button>
+            <h2 className="font-display font-semibold text-xl text-dark-700 dark:text-dark-300 mb-2">
+              {t('admin.districts.empty_title')}
+            </h2>
+            <p className="text-dark-500 text-sm mb-6">{t('admin.districts.empty_subtitle')}</p>
+            <button onClick={openCreate} className="btn-primary"><Plus size={16} /> {t('admin.districts.add_btn')}</button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -260,8 +279,8 @@ const AdminDistricts = () => {
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                  <div className="absolute top-2 right-2 glass rounded-lg px-2 py-1 text-white text-xs font-medium">
-                    {district.apartmentCount ?? 0} apts
+                  <div className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} glass rounded-lg px-2 py-1 text-white text-xs font-medium`}>
+                    {t('admin.districts.apts_badge', { count: district.apartmentCount ?? 0 })}
                   </div>
                 </div>
 
@@ -272,9 +291,11 @@ const AdminDistricts = () => {
                     <p className="text-xs text-dark-400 mt-1 line-clamp-1">{district.description}</p>
                   )}
                   <div className="flex items-center gap-4 text-xs text-dark-400 mt-2">
-                    <span>{district.apartmentCount ?? 0} apartments</span>
+                    <span>{t('admin.districts.apartments_other', { count: district.apartmentCount ?? 0 })}</span>
                     {district.availableCount > 0 && (
-                      <span className="text-emerald-500">{district.availableCount} available</span>
+                      <span className="text-emerald-500">
+                        {t('admin.districts.available_other', { count: district.availableCount })}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -286,14 +307,14 @@ const AdminDistricts = () => {
                     id={`edit-district-${district._id}`}
                     className="btn-secondary flex-1 justify-center text-xs py-2"
                   >
-                    <Edit size={14} /> Edit
+                    <Edit size={14} /> {t('admin.districts.edit_btn')}
                   </button>
                   <button
                     onClick={() => setDeleteConfirm(district)}
                     id={`delete-district-${district._id}`}
                     className="btn-danger flex-1 justify-center text-xs py-2"
                   >
-                    <Trash2 size={14} /> Delete
+                    <Trash2 size={14} /> {t('admin.districts.delete_btn')}
                   </button>
                 </div>
               </motion.div>
@@ -328,22 +349,30 @@ const AdminDistricts = () => {
                 <div className="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <AlertCircle size={28} className="text-red-500" />
                 </div>
-                <h3 className="font-display font-bold text-xl text-dark-900 dark:text-white mb-2">Delete District?</h3>
+                <h3 className="font-display font-bold text-xl text-dark-900 dark:text-white mb-2">
+                  {t('admin.districts.delete_title')}
+                </h3>
                 <p className="text-dark-500 dark:text-dark-400 text-sm mb-1">
-                  Are you sure you want to delete <strong>"{deleteConfirm.name}"</strong>?
+                  {t('admin.districts.delete_confirm')}{' '}
+                  <strong>"{deleteConfirm.name}"</strong>?
                 </p>
                 <p className="text-red-500 text-xs mb-6">
-                  This will also delete all {deleteConfirm.apartmentCount ?? 0} apartments in this district.
+                  {t('admin.districts.delete_warning_other', { count: deleteConfirm.apartmentCount ?? 0 })}
                 </p>
                 <div className="flex gap-3">
-                  <button onClick={() => setDeleteConfirm(null)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                  <button onClick={() => setDeleteConfirm(null)} className="btn-secondary flex-1 justify-center">
+                    {t('admin.districts.cancel')}
+                  </button>
                   <button
                     onClick={() => handleDelete(deleteConfirm)}
                     disabled={deleting}
                     id="confirm-delete-district"
                     className="btn-danger flex-1 justify-center"
                   >
-                    {deleting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Delete'}
+                    {deleting
+                      ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      : t('common.delete')
+                    }
                   </button>
                 </div>
               </div>

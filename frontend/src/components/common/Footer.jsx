@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
-import { GraduationCap, Github, Mail, MapPin } from 'lucide-react';
+import { GraduationCap, Mail, MapPin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
+  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -19,21 +21,20 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-sm text-dark-500 dark:text-dark-400 leading-relaxed max-w-xs">
-              UniStay helps university students find furnished apartments quickly and easily.
-              Browse areas, filter by price, and connect with landlords.
+              {t('footer.tagline')}
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
             <h3 className="font-semibold text-dark-800 dark:text-dark-200 mb-4 text-sm uppercase tracking-wider">
-              Quick Links
+              {t('footer.quick_links')}
             </h3>
             <ul className="space-y-2.5">
               {[
-                { label: 'Browse Districts', to: '/' },
-                { label: 'Search Apartments', to: '/search' },
-                { label: 'Admin Login', to: '/admin/login' },
+                { label: t('footer.browse_districts'), to: '/' },
+                { label: t('footer.search_apartments'), to: '/search' },
+                { label: t('footer.admin_login'), to: '/admin/login' },
               ].map((link) => (
                 <li key={link.to}>
                   <Link
@@ -50,7 +51,7 @@ const Footer = () => {
           {/* Contact */}
           <div>
             <h3 className="font-semibold text-dark-800 dark:text-dark-200 mb-4 text-sm uppercase tracking-wider">
-              Contact
+              {t('footer.contact')}
             </h3>
             <ul className="space-y-2.5">
               <li className="flex items-center gap-2 text-sm text-dark-500 dark:text-dark-400">
@@ -59,7 +60,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-2 text-sm text-dark-500 dark:text-dark-400">
                 <MapPin size={14} className="text-primary-500 shrink-0" />
-                University District
+                {t('footer.university_district')}
               </li>
             </ul>
           </div>
@@ -67,12 +68,12 @@ const Footer = () => {
 
         <div className="mt-10 pt-6 border-t border-dark-100 dark:border-dark-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-dark-400 dark:text-dark-500">
-            © {currentYear} UniStay. All rights reserved.
+            © {currentYear} UniStay. {t('footer.rights')}
           </p>
           <div className="flex items-center gap-1 text-sm text-dark-400 dark:text-dark-500">
-            <span>Built with</span>
+            <span>{t('footer.built_with')}</span>
             <span className="text-primary-500 mx-1">♥</span>
-            <span>for students</span>
+            <span>{t('footer.for_students')}</span>
           </div>
         </div>
       </div>

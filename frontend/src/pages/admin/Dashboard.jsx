@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, Building2, MapPin, CheckCircle,
-  XCircle, Star, TrendingUp, Clock, ChevronRight, Hash
+  XCircle, Star, Clock, ChevronRight, ChevronLeft, Hash,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../../context/LanguageContext';
 import { adminAPI } from '../../api/axios';
 
 const formatPrice = (price) =>
@@ -32,6 +34,10 @@ const StatCard = ({ icon: Icon, label, value, color, index }) => (
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
+
+  const ArrowIcon = isRTL ? ChevronLeft : ChevronRight;
 
   useEffect(() => {
     document.title = 'Admin Dashboard - UniStay';
@@ -42,10 +48,10 @@ const AdminDashboard = () => {
 
   const statCards = stats
     ? [
-        { icon: MapPin, label: 'Total Districts', value: stats.totalDistricts, color: 'text-indigo-500' },
-        { icon: Building2, label: 'Total Apartments', value: stats.totalApartments, color: 'text-primary-500' },
-        { icon: CheckCircle, label: 'Available', value: stats.availableApartments, color: 'text-emerald-500' },
-        { icon: Star, label: 'Featured', value: stats.featuredApartments, color: 'text-amber-500' },
+        { icon: MapPin,      label: t('admin.dashboard.total_districts'),  value: stats.totalDistricts,      color: 'text-indigo-500'  },
+        { icon: Building2,   label: t('admin.dashboard.total_apartments'), value: stats.totalApartments,     color: 'text-primary-500' },
+        { icon: CheckCircle, label: t('admin.dashboard.available'),        value: stats.availableApartments, color: 'text-emerald-500' },
+        { icon: Star,        label: t('admin.dashboard.featured'),         value: stats.featuredApartments,  color: 'text-amber-500'   },
       ]
     : [];
 
@@ -59,8 +65,12 @@ const AdminDashboard = () => {
               <LayoutDashboard size={20} className="text-primary-500" />
             </div>
             <div>
-              <h1 className="font-display font-bold text-xl text-dark-900 dark:text-white">Dashboard</h1>
-              <p className="text-xs text-dark-400 dark:text-dark-500">Manage your UniStay platform</p>
+              <h1 className="font-display font-bold text-xl text-dark-900 dark:text-white">
+                {t('admin.dashboard.title')}
+              </h1>
+              <p className="text-xs text-dark-400 dark:text-dark-500">
+                {t('admin.dashboard.subtitle')}
+              </p>
             </div>
           </div>
         </div>
@@ -85,7 +95,9 @@ const AdminDashboard = () => {
 
         {/* Quick Actions */}
         <div>
-          <h2 className="font-display font-semibold text-lg text-dark-800 dark:text-dark-200 mb-4">Quick Actions</h2>
+          <h2 className="font-display font-semibold text-lg text-dark-800 dark:text-dark-200 mb-4">
+            {t('admin.dashboard.quick_actions')}
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Link
               to="/admin/districts"
@@ -96,10 +108,14 @@ const AdminDashboard = () => {
                 <MapPin size={22} className="text-indigo-500" />
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-dark-800 dark:text-dark-100 group-hover:text-primary-500 transition-colors">Manage Districts</p>
-                <p className="text-sm text-dark-400">{stats?.totalDistricts ?? '—'} districts</p>
+                <p className="font-semibold text-dark-800 dark:text-dark-100 group-hover:text-primary-500 transition-colors">
+                  {t('admin.dashboard.manage_districts')}
+                </p>
+                <p className="text-sm text-dark-400">
+                  {t('admin.dashboard.districts_count_other', { count: stats?.totalDistricts ?? '—' })}
+                </p>
               </div>
-              <ChevronRight size={18} className="text-dark-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+              <ArrowIcon size={18} className="text-dark-300 group-hover:text-primary-500 transition-all" />
             </Link>
 
             <Link
@@ -111,10 +127,14 @@ const AdminDashboard = () => {
                 <Building2 size={22} className="text-primary-500" />
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-dark-800 dark:text-dark-100 group-hover:text-primary-500 transition-colors">Manage Apartments</p>
-                <p className="text-sm text-dark-400">{stats?.totalApartments ?? '—'} apartments</p>
+                <p className="font-semibold text-dark-800 dark:text-dark-100 group-hover:text-primary-500 transition-colors">
+                  {t('admin.dashboard.manage_apartments')}
+                </p>
+                <p className="text-sm text-dark-400">
+                  {t('admin.dashboard.apartments_count_other', { count: stats?.totalApartments ?? '—' })}
+                </p>
               </div>
-              <ChevronRight size={18} className="text-dark-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+              <ArrowIcon size={18} className="text-dark-300 group-hover:text-primary-500 transition-all" />
             </Link>
           </div>
         </div>
@@ -123,7 +143,9 @@ const AdminDashboard = () => {
         <div>
           <div className="flex items-center gap-2 mb-4">
             <Clock size={18} className="text-primary-500" />
-            <h2 className="font-display font-semibold text-lg text-dark-800 dark:text-dark-200">Recent Listings</h2>
+            <h2 className="font-display font-semibold text-lg text-dark-800 dark:text-dark-200">
+              {t('admin.dashboard.recent_listings')}
+            </h2>
           </div>
           <div className="card overflow-hidden">
             {loading ? (
@@ -169,7 +191,7 @@ const AdminDashboard = () => {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className={apt.available ? 'badge-available' : 'badge-unavailable'}>
-                        {apt.available ? 'Available' : 'Unavailable'}
+                        {apt.available ? t('admin.dashboard.available_badge') : t('admin.dashboard.unavailable_badge')}
                       </span>
                       <span className="font-semibold text-sm text-primary-500">
                         {formatPrice(apt.price)}/mo
@@ -180,7 +202,10 @@ const AdminDashboard = () => {
               </div>
             ) : (
               <div className="p-8 text-center text-dark-400 text-sm">
-                No apartments yet. <Link to="/admin/apartments" className="text-primary-500 hover:underline">Add your first one!</Link>
+                {t('admin.dashboard.no_apartments')}{' '}
+                <Link to="/admin/apartments" className="text-primary-500 hover:underline">
+                  {t('admin.dashboard.add_first')}
+                </Link>
               </div>
             )}
           </div>

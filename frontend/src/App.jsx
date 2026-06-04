@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -10,8 +11,11 @@ import AdminLogin from './pages/admin/Login';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminDistricts from './pages/admin/Districts';
 import AdminApartments from './pages/admin/Apartments';
+import { Link } from 'react-router-dom';
 
 function App() {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-dark-900 transition-colors duration-300">
       <Navbar />
@@ -57,9 +61,13 @@ function App() {
             path="*"
             element={
               <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-                <h1 className="font-display text-6xl font-bold text-primary-500">404</h1>
-                <p className="text-xl text-dark-500 dark:text-dark-400">Page not found</p>
-                <a href="/" className="btn-primary">Go Home</a>
+                <h1 className="font-display text-6xl font-bold text-primary-500">
+                  {t('common.not_found_404')}
+                </h1>
+                <p className="text-xl text-dark-500 dark:text-dark-400">
+                  {t('common.not_found_title')}
+                </p>
+                <Link to="/" className="btn-primary">{t('common.go_home')}</Link>
               </div>
             }
           />
