@@ -124,7 +124,7 @@ const ApartmentDetail = () => {
             </>
           )}
           <span className="text-dark-900 dark:text-white font-medium truncate max-w-xs">
-            {apartment.title}
+            {isRTL ? `الطابق ${apartment.floor}` : `Floor ${apartment.floor}`}
           </span>
         </div>
       </div>
@@ -148,7 +148,7 @@ const ApartmentDetail = () => {
           {/* Left: Images + Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Image Gallery */}
-            <ImageCarousel images={apartment.images} title={apartment.title} />
+            <ImageCarousel images={apartment.images} title={`Floor ${apartment.floor}`} />
 
             {/* Title Block */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -176,7 +176,7 @@ const ApartmentDetail = () => {
               </div>
 
               <h1 className="font-display font-bold text-2xl md:text-3xl text-dark-900 dark:text-white mb-2">
-                {apartment.title}
+                {isRTL ? `الطابق ${apartment.floor}` : `Floor ${apartment.floor}`}
               </h1>
 
               <div className="flex items-center gap-2 text-dark-500 dark:text-dark-400 text-sm">

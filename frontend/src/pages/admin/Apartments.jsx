@@ -30,7 +30,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
   const [form, setForm] = useState({
     apartmentId: apartment?.apartmentId || '',
     districtId: apartment?.districtId?._id || apartment?.districtId || '',
-    title: apartment?.title || '',
+    floor: apartment?.floor || 1,
     description: apartment?.description || '',
     buildingNo: apartment?.buildingNo || '',
     apartmentNo: apartment?.apartmentNo || '',
@@ -76,7 +76,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.apartmentId || !form.districtId || !form.title || !form.price || !form.rooms) {
+    if (!form.apartmentId || !form.districtId || !form.floor || !form.price || !form.rooms) {
       toast.error(t('admin.apartments.fill_required'));
       return;
     }
@@ -85,7 +85,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
       const fd = new FormData();
       fd.append('apartmentId', form.apartmentId.toUpperCase());
       fd.append('districtId', form.districtId);
-      fd.append('title', form.title);
+      fd.append('floor', form.floor);
       fd.append('description', form.description);
       fd.append('buildingNo', form.buildingNo);
       fd.append('apartmentNo', form.apartmentNo);
@@ -221,14 +221,16 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                 </div>
 
                 <div>
-                  <label className="label" htmlFor="apt-title">{t('admin.apartments.title_label')}</label>
+                  <label className="label" htmlFor="apt-floor">{t('admin.apartments.floor_label')}</label>
                   <input
-                    id="apt-title"
-                    type="text"
-                    value={form.title}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    id="apt-floor"
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={form.floor}
+                    onChange={(e) => setForm({ ...form, floor: e.target.value })}
                     className="input"
-                    placeholder={t('admin.apartments.title_placeholder')}
+                    placeholder={t('admin.apartments.floor_placeholder')}
                     required
                   />
                 </div>
@@ -651,7 +653,7 @@ const AdminApartments = () => {
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg overflow-hidden bg-dark-100 dark:bg-dark-700 shrink-0">
                             {apt.images?.[0] ? (
-                              <img src={apt.images[0]} alt={apt.title} className="w-full h-full object-cover" />
+                              <img src={apt.images[0]} alt={`Apartment ${apt.apartmentId}`} className="w-full h-full object-cover" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
                                 <Building2 size={14} className="text-dark-400" />
@@ -659,7 +661,7 @@ const AdminApartments = () => {
                             )}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-medium text-dark-800 dark:text-dark-100 truncate max-w-[160px]">{apt.title}</p>
+                            <p className="font-medium text-dark-800 dark:text-dark-100 truncate max-w-[160px]">Floor {apt.floor}</p>
                             <p className="text-xs text-dark-400 font-mono">#{apt.apartmentId}</p>
                           </div>
                         </div>
@@ -778,7 +780,7 @@ const AdminApartments = () => {
                 </h3>
                 <p className="text-dark-500 dark:text-dark-400 text-sm mb-6">
                   {t('admin.apartments.delete_confirm')}{' '}
-                  <strong>"{deleteConfirm.title}"</strong>?{' '}
+                  <strong>"Floor {deleteConfirm.floor} #{deleteConfirm.apartmentId}"</strong>?{' '}
                   {t('admin.apartments.delete_warning')}
                 </p>
                 <div className="flex gap-3">

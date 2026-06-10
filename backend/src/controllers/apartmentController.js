@@ -171,7 +171,7 @@ const createApartment = async (req, res, next) => {
     const apartment = await Apartment.create({
       apartmentId: req.body.apartmentId,
       districtId: req.body.districtId,
-      title: req.body.title,
+      floor: Number(req.body.floor),
       description: req.body.description,
       buildingNo: req.body.buildingNo,
       apartmentNo: req.body.apartmentNo,
@@ -242,14 +242,14 @@ const updateApartment = async (req, res, next) => {
       if (req.body.contactInfo) contactInfo = JSON.parse(req.body.contactInfo);
     } catch (_) {}
 
-    // Update fields
     const updatableFields = [
-      'apartmentId', 'districtId', 'title', 'description', 'rooms',
+      'apartmentId', 'districtId', 'description', 'rooms',
       'buildingNo', 'apartmentNo',
     ];
     updatableFields.forEach((field) => {
       if (req.body[field] !== undefined) apartment[field] = req.body[field];
     });
+    if (req.body.floor !== undefined) apartment.floor = Number(req.body.floor);
 
     if (req.body.price !== undefined) apartment.price = Number(req.body.price);
     if (req.body.capacity !== undefined) apartment.capacity = Number(req.body.capacity);

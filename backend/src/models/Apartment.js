@@ -14,10 +14,10 @@ const apartmentSchema = new mongoose.Schema(
       ref: 'District',
       required: [true, 'District is required'],
     },
-    title: {
-      type: String,
-      required: [true, 'Title is required'],
-      trim: true,
+    floor: {
+      type: Number,
+      required: [true, 'Floor is required'],
+      min: [1, 'Floor must be at least 1'],
     },
     description: {
       type: String,

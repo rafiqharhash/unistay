@@ -40,7 +40,7 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
         {firstImage ? (
           <img
             src={firstImage}
-            alt={apartment.title}
+            alt={`Apartment ${apartment.apartmentId}`}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             loading="lazy"
           />
@@ -74,11 +74,13 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
 
       {/* Content */}
       <div className="p-5 flex flex-col flex-1 gap-3">
-        {/* Title and ID */}
+        {/* Floor and ID */}
         <div>
           <div className="flex items-start justify-between gap-2 mb-1">
             <h3 className="font-display font-semibold text-base text-dark-900 dark:text-white line-clamp-1 group-hover:text-primary-500 transition-colors">
-              {apartment.title}
+              {isRTL
+                ? `الطابق ${apartment.floor}`
+                : `Floor ${apartment.floor}`}
             </h3>
           </div>
           <span className="text-xs text-dark-400 dark:text-dark-500 font-mono">#{apartment.apartmentId}</span>
