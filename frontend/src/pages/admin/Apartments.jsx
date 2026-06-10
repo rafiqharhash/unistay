@@ -37,7 +37,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
     price: apartment?.price || '',
     rooms: apartment?.rooms || '',
     capacity: apartment?.capacity || 1,
-    gender: apartment?.gender || 'male',
+    gender: apartment?.gender || 'mixed',
     wifi: apartment?.wifi || false,
     desks: apartment?.desks || false,
     elevator: apartment?.elevator || false,
@@ -328,6 +328,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                       onChange={(e) => setForm({ ...form, gender: e.target.value })}
                       className="input appearance-none"
                     >
+                      <option value="mixed">{t('admin.apartments.mixed')}</option>
                       <option value="male">{t('admin.apartments.male_only')}</option>
                       <option value="female">{t('admin.apartments.female_only')}</option>
                     </select>

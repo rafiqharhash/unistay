@@ -257,6 +257,7 @@
       "capacity_label": "الطاقة الاستيعابية (طلاب)",
       "available_beds_label": "الأسرة المتاحة",
       "gender_label": "سياسة الجنس",
+      "mixed": "غير محدد",
       "male_only": "للذكور فقط",
       "female_only": "للإناث فقط",
       "wifi_toggle": "واي فاي مشمول",

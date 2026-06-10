@@ -257,6 +257,7 @@
       "capacity_label": "Capacity (students)",
       "available_beds_label": "Available Beds",
       "gender_label": "Gender Policy",
+      "mixed": "Not Specific",
       "male_only": "Male Only",
       "female_only": "Female Only",
       "wifi_toggle": "WiFi Included",
