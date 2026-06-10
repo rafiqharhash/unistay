@@ -444,6 +444,8 @@ module.exports = {
   getApartments,
   getFeaturedApartments,
   getApartment,
+  getAdminApartments,
+  getAdminApartment,
   createApartment,
   updateApartment,
   deleteApartment,
