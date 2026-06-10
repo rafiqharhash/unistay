@@ -28,6 +28,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
   const { isRTL } = useLanguage();
 
   const [form, setForm] = useState({
+    apartmentId: apartment?.apartmentId || '',
     districtId: apartment?.districtId?._id || apartment?.districtId || '',
     floor: apartment?.floor || 1,
     description: apartment?.description || '',
@@ -82,6 +83,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
     setLoading(true);
     try {
       const fd = new FormData();
+      if (form.apartmentId) fd.append('apartmentId', form.apartmentId);
       fd.append('districtId', form.districtId);
       fd.append('floor', form.floor);
       fd.append('description', form.description);
@@ -179,6 +181,23 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
             {activeTab === 'basic' && (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label" htmlFor="apt-id">{t('admin.apartments.id_label')}</label>
+                    <div className="relative">
+                      <Hash
+                        size={14}
+                        className={`absolute top-1/2 -translate-y-1/2 text-dark-400 ${isRTL ? 'right-3' : 'left-3'}`}
+                      />
+                      <input
+                        id="apt-id"
+                        type="text"
+                        value={form.apartmentId}
+                        className={`input uppercase bg-dark-50 dark:bg-dark-800 text-dark-400 cursor-not-allowed ${isRTL ? 'pr-8' : 'pl-8'}`}
+                        placeholder={apartment ? '' : 'Auto-generated on save'}
+                        disabled
+                      />
+                    </div>
+                  </div>
                   <div>
                     <label className="label" htmlFor="apt-district">{t('admin.apartments.district_label')}</label>
                     <div className="relative">
