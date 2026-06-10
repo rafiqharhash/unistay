@@ -47,9 +47,6 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
     availableBeds: apartment?.availableBeds || 0,
     available: apartment?.available ?? true,
     featured: apartment?.featured || false,
-    contactPhone: apartment?.contactInfo?.phone || '',
-    contactEmail: apartment?.contactInfo?.email || '',
-    contactWhatsapp: apartment?.contactInfo?.whatsapp || '',
   });
 
   const [newFiles, setNewFiles] = useState([]);
@@ -105,11 +102,6 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
       fd.append('availableBeds', form.availableBeds);
       fd.append('available', form.available);
       fd.append('featured', form.featured);
-      fd.append('contactInfo', JSON.stringify({
-        phone: form.contactPhone,
-        email: form.contactEmail,
-        whatsapp: form.contactWhatsapp,
-      }));
       if (apartment) {
         fd.append('existingImages', JSON.stringify(existingImages));
       }
@@ -134,7 +126,6 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
     { id: 'basic',   label: t('admin.apartments.tab_basic')   },
     { id: 'details', label: t('admin.apartments.tab_details') },
     { id: 'images',  label: t('admin.apartments.tab_images')  },
-    { id: 'contact', label: t('admin.apartments.tab_contact') },
   ];
 
   const toggleFields = [

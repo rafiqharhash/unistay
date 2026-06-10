@@ -112,7 +112,8 @@
     "not_found_title": "الشقة غير موجودة",
     "link_copied": "تم نسخ الرابط!",
     "building_apt": "مبنى {{building}}، شقة {{apt}}",
-    "featured_label": "مميز"
+    "featured_label": "مميز",
+    "whatsapp_inquire": "استفسر عبر واتساب"
   },
   "filter": {
     "search_placeholder": "ابحث برقم الشقة...",

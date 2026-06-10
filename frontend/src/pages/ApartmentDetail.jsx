@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  ArrowLeft, ArrowRight, MapPin, BedDouble, Users, Wind, Phone, Mail,
+  ArrowLeft, ArrowRight, MapPin, BedDouble, Users, Wind,
   MessageCircle, CheckCircle, XCircle, Star, Hash, Calendar,
-  ExternalLink, AlertCircle, Share2,
+  Share2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -305,65 +305,19 @@ const ApartmentDetail = () => {
                 </span>
               </div>
 
-              {/* Contact Section */}
-              {(apartment.contactInfo?.phone || apartment.contactInfo?.email || apartment.contactInfo?.whatsapp) && (
-                <div className="mt-5 pt-5 border-t border-dark-100 dark:border-dark-700">
-                  <h3 className="font-semibold text-dark-800 dark:text-dark-200 mb-3 text-sm">
-                    {t('apartment.contact_landlord')}
-                  </h3>
-                  <div className="space-y-2">
-                    {apartment.contactInfo.phone && (
-                      <a
-                        href={`tel:${apartment.contactInfo.phone}`}
-                        id="contact-phone"
-                        className="flex items-center gap-3 p-3 bg-dark-50 dark:bg-dark-700 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors group"
-                      >
-                        <Phone size={16} className="text-primary-500" />
-                        <div>
-                          <p className="text-xs text-dark-400">{t('apartment.phone_label')}</p>
-                          <p className="text-sm font-medium text-dark-800 dark:text-dark-100 group-hover:text-primary-600">
-                            {apartment.contactInfo.phone}
-                          </p>
-                        </div>
-                      </a>
-                    )}
-                    {apartment.contactInfo.whatsapp && (
-                      <a
-                        href={`https://wa.me/${apartment.contactInfo.whatsapp.replace(/\D/g, '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        id="contact-whatsapp"
-                        className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors"
-                      >
-                        <MessageCircle size={16} className="text-emerald-500" />
-                        <div>
-                          <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                            {t('apartment.whatsapp_label')}
-                          </p>
-                          <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
-                            {apartment.contactInfo.whatsapp}
-                          </p>
-                        </div>
-                      </a>
-                    )}
-                    {apartment.contactInfo.email && (
-                      <a
-                        href={`mailto:${apartment.contactInfo.email}`}
-                        id="contact-email"
-                        className="flex items-center gap-3 p-3 bg-dark-50 dark:bg-dark-700 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors group"
-                      >
-                        <Mail size={16} className="text-primary-500" />
-                        <div>
-                          <p className="text-xs text-dark-400">{t('apartment.email_label')}</p>
-                          <p className="text-sm font-medium text-dark-800 dark:text-dark-100 group-hover:text-primary-600">
-                            {apartment.contactInfo.email}
-                          </p>
-                        </div>
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
+              {/* WhatsApp CTA */}
+              <div className="mt-5 pt-5 border-t border-dark-100 dark:border-dark-700">
+                <a
+                  href={`https://wa.me/201035396964?text=${encodeURIComponent(`Hi, I'm interested in apartment #${apartment.apartmentId}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  id="contact-whatsapp"
+                  className="flex items-center justify-center gap-3 w-full p-4 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50"
+                >
+                  <MessageCircle size={20} />
+                  {t('apartment.whatsapp_inquire')}
+                </a>
+              </div>
             </div>
           </div>
         </div>
