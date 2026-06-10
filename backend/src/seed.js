@@ -8,17 +8,17 @@ const seed = async () => {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('✅ Connected to MongoDB for seeding...');
 
-    const email = 'admin@unistay.com';
+    const email = 'muhammed@unistay.com';
     const existing = await Admin.findOne({ email });
 
     if (existing) {
       console.log('ℹ️  Admin account already exists. Skipping seed.');
     } else {
-      const passwordHash = await bcrypt.hash('Admin@123', 12);
+      const passwordHash = await bcrypt.hash('Muhammed@123', 12);
       await Admin.create({ email, passwordHash });
       console.log('✅ Default admin account created:');
-      console.log('   Email:    admin@unistay.com');
-      console.log('   Password: Admin@123');
+      console.log('   Email:    muhammed@unistay.com');
+      console.log('   Password: Muhammed@123');
       console.log('');
       console.log('⚠️  IMPORTANT: Change the default password after first login!');
     }
