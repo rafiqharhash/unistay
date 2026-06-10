@@ -37,7 +37,7 @@ const InfoChip = ({ icon: Icon, label, value, color = 'text-primary-500' }) => (
 const ApartmentDetail = () => {
   const { id } = useParams();
   const { t } = useTranslation();
-  const { isRTL } = useLanguage();
+  const { isRTL, language } = useLanguage();
   const [apartment, setApartment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
