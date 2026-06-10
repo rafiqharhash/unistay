@@ -28,8 +28,6 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
   const { isRTL } = useLanguage();
 
   const [form, setForm] = useState({
-    ownerName: apartment?.ownerName || '',
-    ownerPhone: apartment?.ownerPhone || '',
     districtId: apartment?.districtId?._id || apartment?.districtId || '',
     floor: apartment?.floor || 1,
     description: apartment?.description || '',
@@ -84,8 +82,6 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
     setLoading(true);
     try {
       const fd = new FormData();
-      if (form.ownerName) fd.append('ownerName', form.ownerName);
-      if (form.ownerPhone) fd.append('ownerPhone', form.ownerPhone);
       fd.append('districtId', form.districtId);
       fd.append('floor', form.floor);
       fd.append('description', form.description);
@@ -182,31 +178,6 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
             {/* ── Basic Info Tab ── */}
             {activeTab === 'basic' && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="label" htmlFor="apt-owner-name">{t('admin.apartments.owner_name_label')}</label>
-                    <input
-                      id="apt-owner-name"
-                      type="text"
-                      value={form.ownerName}
-                      onChange={(e) => setForm({ ...form, ownerName: e.target.value })}
-                      className="input"
-                      placeholder={t('admin.apartments.owner_name_placeholder')}
-                    />
-                  </div>
-                  <div>
-                    <label className="label" htmlFor="apt-owner-phone">{t('admin.apartments.owner_phone_label')}</label>
-                    <input
-                      id="apt-owner-phone"
-                      type="tel"
-                      value={form.ownerPhone}
-                      onChange={(e) => setForm({ ...form, ownerPhone: e.target.value })}
-                      className="input"
-                      placeholder={t('admin.apartments.owner_phone_placeholder')}
-                    />
-                  </div>
-                </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="label" htmlFor="apt-district">{t('admin.apartments.district_label')}</label>
@@ -497,7 +468,7 @@ const AdminApartments = () => {
     setLoading(true);
     try {
       const [aptRes, distRes] = await Promise.all([
-        apartmentAPI.getAllAdmin({ page, limit: 10, search: searchStr }),
+        apartmentAPI.getAll({ page, limit: 10, search: searchStr }),
         districtAPI.getAll(),
       ]);
       setApartments(aptRes.data.data || []);
