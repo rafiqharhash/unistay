@@ -4,21 +4,16 @@ const { validationResult } = require('express-validator');
 const Apartment = require('../models/Apartment');
 const District = require('../models/District');
 
-// Helper to generate a random ID: 1-2 letters + 3-4 numbers
+// Helper to generate a random ID: A-C + 1-99
 const generateApartmentId = async () => {
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const letters = 'ABC';
   const getLetter = () => letters[Math.floor(Math.random() * letters.length)];
-  const getNumber = () => Math.floor(Math.random() * 10);
+  const getNumber = () => Math.floor(Math.random() * 99) + 1;
   
   let isUnique = false;
   let newId = '';
   while (!isUnique) {
-    const numLetters = Math.floor(Math.random() * 2) + 1; // 1 or 2
-    const numDigits = Math.floor(Math.random() * 2) + 3; // 3 or 4
-    
-    let idStr = '';
-    for (let i = 0; i < numLetters; i++) idStr += getLetter();
-    for (let i = 0; i < numDigits; i++) idStr += getNumber();
+    const idStr = `${getLetter()}${getNumber()}`;
     
     newId = idStr;
     const existing = await Apartment.findOne({ apartmentId: newId });
