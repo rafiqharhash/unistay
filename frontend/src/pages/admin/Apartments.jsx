@@ -28,7 +28,8 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
   const { isRTL } = useLanguage();
 
   const [form, setForm] = useState({
-    apartmentId: apartment?.apartmentId || '',
+    ownerName: apartment?.ownerName || '',
+    ownerPhone: apartment?.ownerPhone || '',
     districtId: apartment?.districtId?._id || apartment?.districtId || '',
     floor: apartment?.floor || 1,
     description: apartment?.description || '',
@@ -76,14 +77,15 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.apartmentId || !form.districtId || !form.floor || !form.price || !form.rooms) {
+    if (!form.districtId || !form.floor || !form.price || !form.rooms) {
       toast.error(t('admin.apartments.fill_required'));
       return;
     }
     setLoading(true);
     try {
       const fd = new FormData();
-      fd.append('apartmentId', form.apartmentId.toUpperCase());
+      if (form.ownerName) fd.append('ownerName', form.ownerName);
+      if (form.ownerPhone) fd.append('ownerPhone', form.ownerPhone);
       fd.append('districtId', form.districtId);
       fd.append('floor', form.floor);
       fd.append('description', form.description);
@@ -182,23 +184,30 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="label" htmlFor="apt-id">{t('admin.apartments.id_label')}</label>
-                    <div className="relative">
-                      <Hash
-                        size={14}
-                        className={`absolute top-1/2 -translate-y-1/2 text-dark-400 ${isRTL ? 'right-3' : 'left-3'}`}
-                      />
-                      <input
-                        id="apt-id"
-                        type="text"
-                        value={form.apartmentId}
-                        onChange={(e) => setForm({ ...form, apartmentId: e.target.value })}
-                        className={`input uppercase ${isRTL ? 'pr-8' : 'pl-8'}`}
-                        placeholder={t('admin.apartments.id_placeholder')}
-                        required
-                      />
-                    </div>
+                    <label className="label" htmlFor="apt-owner-name">{t('admin.apartments.owner_name_label')}</label>
+                    <input
+                      id="apt-owner-name"
+                      type="text"
+                      value={form.ownerName}
+                      onChange={(e) => setForm({ ...form, ownerName: e.target.value })}
+                      className="input"
+                      placeholder={t('admin.apartments.owner_name_placeholder')}
+                    />
                   </div>
+                  <div>
+                    <label className="label" htmlFor="apt-owner-phone">{t('admin.apartments.owner_phone_label')}</label>
+                    <input
+                      id="apt-owner-phone"
+                      type="tel"
+                      value={form.ownerPhone}
+                      onChange={(e) => setForm({ ...form, ownerPhone: e.target.value })}
+                      className="input"
+                      placeholder={t('admin.apartments.owner_phone_placeholder')}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="label" htmlFor="apt-district">{t('admin.apartments.district_label')}</label>
                     <div className="relative">
@@ -218,21 +227,20 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                       />
                     </div>
                   </div>
-                </div>
-
-                <div>
-                  <label className="label" htmlFor="apt-floor">{t('admin.apartments.floor_label')}</label>
-                  <input
-                    id="apt-floor"
-                    type="number"
-                    min={1}
-                    max={20}
-                    value={form.floor}
-                    onChange={(e) => setForm({ ...form, floor: e.target.value })}
-                    className="input"
-                    placeholder={t('admin.apartments.floor_placeholder')}
-                    required
-                  />
+                  <div>
+                    <label className="label" htmlFor="apt-floor">{t('admin.apartments.floor_label')}</label>
+                    <input
+                      id="apt-floor"
+                      type="number"
+                      min={1}
+                      max={20}
+                      value={form.floor}
+                      onChange={(e) => setForm({ ...form, floor: e.target.value })}
+                      className="input"
+                      placeholder={t('admin.apartments.floor_placeholder')}
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -489,7 +497,7 @@ const AdminApartments = () => {
     setLoading(true);
     try {
       const [aptRes, distRes] = await Promise.all([
-        apartmentAPI.getAll({ page, limit: 10, search: searchStr }),
+        apartmentAPI.getAllAdmin({ page, limit: 10, search: searchStr }),
         districtAPI.getAll(),
       ]);
       setApartments(aptRes.data.data || []);

@@ -14,6 +14,8 @@ const {
   deleteApartment,
   toggleFeatured,
   toggleAvailable,
+  getAdminApartments,
+  getAdminApartment,
 } = require('../controllers/apartmentController');
 
 const router = express.Router();
@@ -35,13 +37,14 @@ router.put('/districts/:id', upload.single('coverImage'), updateDistrict);
 router.delete('/districts/:id', deleteDistrict);
 
 // Apartment management
+router.get('/apartments', getAdminApartments);
+router.get('/apartments/:id', getAdminApartment);
 router.post(
   '/apartments',
   upload.array('images', 10),
   [
-    body('apartmentId').notEmpty().withMessage('Apartment ID is required.'),
     body('districtId').notEmpty().withMessage('District is required.'),
-    body('title').notEmpty().withMessage('Title is required.'),
+    body('floor').isNumeric().withMessage('Floor must be a number.'),
     body('price').isNumeric().withMessage('Price must be a number.'),
     body('buildingNo').notEmpty().withMessage('Building number is required.'),
     body('apartmentNo').notEmpty().withMessage('Apartment number is required.'),

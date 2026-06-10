@@ -4,6 +4,29 @@ const { validationResult } = require('express-validator');
 const Apartment = require('../models/Apartment');
 const District = require('../models/District');
 
+// Helper to generate a random ID: 1-2 letters + 3-4 numbers
+const generateApartmentId = async () => {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const getLetter = () => letters[Math.floor(Math.random() * letters.length)];
+  const getNumber = () => Math.floor(Math.random() * 10);
+  
+  let isUnique = false;
+  let newId = '';
+  while (!isUnique) {
+    const numLetters = Math.floor(Math.random() * 2) + 1; // 1 or 2
+    const numDigits = Math.floor(Math.random() * 2) + 3; // 3 or 4
+    
+    let idStr = '';
+    for (let i = 0; i < numLetters; i++) idStr += getLetter();
+    for (let i = 0; i < numDigits; i++) idStr += getNumber();
+    
+    newId = idStr;
+    const existing = await Apartment.findOne({ apartmentId: newId });
+    if (!existing) isUnique = true;
+  }
+  return newId;
+};
+
 // Helper: upload buffer to Cloudinary
 const uploadToCloudinary = (buffer, folder = 'unistay/apartments') => {
   return new Promise((resolve, reject) => {
@@ -78,6 +101,7 @@ const getApartments = async (req, res, next) => {
 
     const [apartments, total] = await Promise.all([
       Apartment.find(query)
+        .select('-ownerName -ownerPhone')
         .populate('districtId', 'name')
         .sort(sortQuery)
         .skip(skip)
@@ -108,6 +132,7 @@ const getApartments = async (req, res, next) => {
 const getFeaturedApartments = async (req, res, next) => {
   try {
     const apartments = await Apartment.find({ featured: true, available: true })
+      .select('-ownerName -ownerPhone')
       .populate('districtId', 'name')
       .sort({ createdAt: -1 })
       .limit(6);
@@ -126,12 +151,78 @@ const getApartment = async (req, res, next) => {
     const apartment = await Apartment.findById(req.params.id).populate(
       'districtId',
       'name description'
-    );
+    ).select('-ownerName -ownerPhone');
 
     if (!apartment) {
       return res.status(404).json({ success: false, message: 'Apartment not found.' });
     }
 
+    res.status(200).json({ success: true, data: apartment });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all apartments for admin (includes all fields)
+// @route   GET /api/admin/apartments
+// @access  Protected
+const getAdminApartments = async (req, res, next) => {
+  try {
+    const {
+      districtId,
+      search,
+      sort = 'newest',
+      page = 1,
+      limit = 12,
+    } = req.query;
+
+    const query = {};
+    if (districtId) query.districtId = districtId;
+    if (search) query.apartmentId = { $regex: search, $options: 'i' };
+
+    const sortOptions = { newest: { createdAt: -1 } };
+    const sortQuery = sortOptions[sort] || { createdAt: -1 };
+
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
+    const skip = (pageNum - 1) * limitNum;
+
+    const [apartments, total] = await Promise.all([
+      Apartment.find(query)
+        .populate('districtId', 'name')
+        .sort(sortQuery)
+        .skip(skip)
+        .limit(limitNum),
+      Apartment.countDocuments(query),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: apartments,
+      pagination: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get single apartment for admin (includes all fields)
+// @route   GET /api/admin/apartments/:id
+// @access  Protected
+const getAdminApartment = async (req, res, next) => {
+  try {
+    const apartment = await Apartment.findById(req.params.id).populate(
+      'districtId',
+      'name'
+    );
+    if (!apartment) {
+      return res.status(404).json({ success: false, message: 'Apartment not found.' });
+    }
     res.status(200).json({ success: true, data: apartment });
   } catch (error) {
     next(error);
@@ -168,9 +259,13 @@ const createApartment = async (req, res, next) => {
       if (req.body.contactInfo) contactInfo = JSON.parse(req.body.contactInfo);
     } catch (_) {}
 
+    const generatedId = await generateApartmentId();
+
     const apartment = await Apartment.create({
-      apartmentId: req.body.apartmentId,
+      apartmentId: generatedId,
       districtId: req.body.districtId,
+      ownerName: req.body.ownerName || '',
+      ownerPhone: req.body.ownerPhone || '',
       floor: Number(req.body.floor),
       description: req.body.description,
       buildingNo: req.body.buildingNo,
@@ -243,8 +338,8 @@ const updateApartment = async (req, res, next) => {
     } catch (_) {}
 
     const updatableFields = [
-      'apartmentId', 'districtId', 'description', 'rooms',
-      'buildingNo', 'apartmentNo',
+      'districtId', 'description', 'rooms',
+      'buildingNo', 'apartmentNo', 'ownerName', 'ownerPhone',
     ];
     updatableFields.forEach((field) => {
       if (req.body[field] !== undefined) apartment[field] = req.body[field];

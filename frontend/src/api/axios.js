@@ -48,8 +48,10 @@ export const districtAPI = {
 // ─── Apartments ──────────────────────────────────────────────────────────────
 export const apartmentAPI = {
   getAll: (params) => api.get('/apartments', { params }),
+  getAllAdmin: (params) => api.get('/admin/apartments', { params }),
   getFeatured: () => api.get('/apartments/featured'),
   getOne: (id) => api.get(`/apartments/${id}`),
+  getOneAdmin: (id) => api.get(`/admin/apartments/${id}`),
   create: (data) => api.post('/admin/apartments', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
   update: (id, data) => api.put(`/admin/apartments/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
   delete: (id) => api.delete(`/admin/apartments/${id}`),

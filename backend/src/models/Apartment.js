@@ -19,6 +19,16 @@ const apartmentSchema = new mongoose.Schema(
       required: [true, 'Floor is required'],
       min: [1, 'Floor must be at least 1'],
     },
+    ownerName: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    ownerPhone: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     description: {
       type: String,
       default: '',
@@ -55,8 +65,8 @@ const apartmentSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: ['male', 'female'],
-      default: 'male',
+      enum: ['male', 'female', 'mixed'],
+      default: 'mixed',
     },
     desks: {
       type: Boolean,
