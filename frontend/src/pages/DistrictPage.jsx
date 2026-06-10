@@ -28,7 +28,8 @@ const DistrictPage = () => {
     districtAPI.getOne(id)
       .then((res) => {
         setDistrict(res.data.data);
-        document.title = `${res.data.data.name} - UniStay`;
+        const titleName = isRTL && res.data.data.nameAr ? res.data.data.nameAr : res.data.data.name;
+        document.title = `${titleName} - UniStay`;
       })
       .catch(() => setError(t('district_page.not_found_title')));
   }, [id, t]);
@@ -107,10 +108,12 @@ const DistrictPage = () => {
                   </span>
                 </div>
                 <h1 className="font-display font-bold text-3xl text-dark-900 dark:text-white">
-                  {district.name}
+                  {isRTL && district.nameAr ? district.nameAr : district.name}
                 </h1>
-                {district.description && (
-                  <p className="text-dark-500 dark:text-dark-400 mt-1 text-sm">{district.description}</p>
+                {(isRTL && district.descriptionAr ? district.descriptionAr : district.description) && (
+                  <p className="text-dark-500 dark:text-dark-400 mt-1 text-sm">
+                    {isRTL && district.descriptionAr ? district.descriptionAr : district.description}
+                  </p>
                 )}
                 <div className="flex items-center gap-4 mt-3 text-sm">
                   <span className="flex items-center gap-1.5 text-dark-500 dark:text-dark-400">

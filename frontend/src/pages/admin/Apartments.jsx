@@ -11,14 +11,15 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../context/LanguageContext';
 import { apartmentAPI, districtAPI } from '../../api/axios';
 
+const isVideo = (url) => {
+  if (!url) return false;
+  return url.match(/\.(mp4|webm|mov|mkv)$/i) !== null;
+};
+
 const formatPrice = (p) =>
   new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(p);
 
-const AMENITIES_SUGGESTIONS = [
-  'Furnished', 'Kitchen', 'Washing Machine', 'Parking', 'Security',
-  'Elevator', 'Balcony', 'Study Room', 'Garden', 'Swimming Pool',
-  'Gym', 'Laundry', 'Storage', 'Electricity Included', 'Water Included',
-];
+
 
 // ─── Apartment Modal ──────────────────────────────────────────────────────────
 
@@ -38,11 +39,14 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
     capacity: apartment?.capacity || 1,
     gender: apartment?.gender || 'male',
     wifi: apartment?.wifi || false,
+    desks: apartment?.desks || false,
+    elevator: apartment?.elevator || false,
+    garden: apartment?.garden || false,
     airConditioning: apartment?.airConditioning || false,
+    fans: apartment?.fans || false,
     availableBeds: apartment?.availableBeds || 0,
     available: apartment?.available ?? true,
     featured: apartment?.featured || false,
-    amenities: apartment?.amenities || [],
     contactPhone: apartment?.contactInfo?.phone || '',
     contactEmail: apartment?.contactInfo?.email || '',
     contactWhatsapp: apartment?.contactInfo?.whatsapp || '',
@@ -58,7 +62,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    const validFiles = files.filter((f) => f.type.startsWith('image/'));
+    const validFiles = files.filter((f) => f.type.startsWith('image/') || f.type.startsWith('video/'));
     if (validFiles.length !== files.length) toast.error(t('admin.apartments.some_skipped'));
     setNewFiles((prev) => [...prev, ...validFiles]);
     setNewPreviews((prev) => [...prev, ...validFiles.map((f) => URL.createObjectURL(f))]);
@@ -71,18 +75,6 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
   const removeExistingImage = (index) => {
     setExistingImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const addAmenity = (value) => {
-    const v = (value || amenityInput).trim();
-    if (v && !form.amenities.includes(v)) {
-      setForm({ ...form, amenities: [...form.amenities, v] });
-    }
-    setAmenityInput('');
-  };
-
-  const removeAmenity = (a) => {
-    setForm({ ...form, amenities: form.amenities.filter((x) => x !== a) });
   };
 
   const handleSubmit = async (e) => {
@@ -105,11 +97,14 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
       fd.append('capacity', form.capacity);
       fd.append('gender', form.gender);
       fd.append('wifi', form.wifi);
+      fd.append('desks', form.desks);
+      fd.append('elevator', form.elevator);
+      fd.append('garden', form.garden);
       fd.append('airConditioning', form.airConditioning);
+      fd.append('fans', form.fans);
       fd.append('availableBeds', form.availableBeds);
       fd.append('available', form.available);
       fd.append('featured', form.featured);
-      fd.append('amenities', JSON.stringify(form.amenities));
       fd.append('contactInfo', JSON.stringify({
         phone: form.contactPhone,
         email: form.contactEmail,
@@ -144,7 +139,11 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
   const toggleFields = [
     { key: 'wifi',             label: t('admin.apartments.wifi_toggle')      },
+    { key: 'desks',            label: t('admin.apartments.desks_toggle')     },
+    { key: 'elevator',         label: t('admin.apartments.elevator_toggle')  },
+    { key: 'garden',           label: t('admin.apartments.garden_toggle')    },
     { key: 'airConditioning',  label: t('admin.apartments.ac_toggle')        },
+    { key: 'fans',             label: t('admin.apartments.fans_toggle')      },
     { key: 'available',        label: t('admin.apartments.available_toggle') },
     { key: 'featured',         label: t('admin.apartments.featured_toggle')  },
   ];
@@ -366,48 +365,6 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                   ))}
                 </div>
 
-                {/* Amenities */}
-                <div>
-                  <label className="label">{t('admin.apartments.amenities_label')}</label>
-                  <div className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={amenityInput}
-                      onChange={(e) => setAmenityInput(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addAmenity(); } }}
-                      className="input flex-1"
-                      placeholder={t('admin.apartments.amenity_placeholder')}
-                      id="amenity-input"
-                    />
-                    <button type="button" onClick={() => addAmenity()} className="btn-secondary px-3">
-                      {t('admin.apartments.add_amenity')}
-                    </button>
-                  </div>
-                  {/* Suggestions */}
-                  <div className="flex flex-wrap gap-1.5 mb-3">
-                    {AMENITIES_SUGGESTIONS.filter((a) => !form.amenities.includes(a)).map((a) => (
-                      <button
-                        key={a}
-                        type="button"
-                        onClick={() => addAmenity(a)}
-                        className="text-xs px-2.5 py-1 rounded-full border border-dark-200 dark:border-dark-600 text-dark-500 hover:border-primary-400 hover:text-primary-500 transition-colors"
-                      >
-                        + {a}
-                      </button>
-                    ))}
-                  </div>
-                  {/* Selected amenities */}
-                  <div className="flex flex-wrap gap-2">
-                    {form.amenities.map((a) => (
-                      <span key={a} className="flex items-center gap-1 px-2.5 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-xs font-medium">
-                        {a}
-                        <button type="button" onClick={() => removeAmenity(a)} className="hover:text-red-500 transition-colors">
-                          <X size={11} />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
               </div>
             )}
 
@@ -420,7 +377,11 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                     <div className="grid grid-cols-3 gap-2">
                       {existingImages.map((url, i) => (
                         <div key={i} className="relative group aspect-square rounded-xl overflow-hidden bg-dark-100 dark:bg-dark-700">
-                          <img src={url} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+                          {isVideo(url) ? (
+                            <video src={url} className="w-full h-full object-cover" muted />
+                          ) : (
+                            <img src={url} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+                          )}
                           <button
                             type="button"
                             onClick={() => removeExistingImage(i)}
@@ -445,13 +406,17 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                     <p className="text-sm text-dark-500 dark:text-dark-400">{t('admin.apartments.upload_click')}</p>
                     <p className="text-xs text-dark-400 mt-1">{t('admin.apartments.upload_hint')}</p>
                   </div>
-                  <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageChange} id="apartment-image-upload" />
+                  <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleImageChange} id="apartment-image-upload" />
 
                   {newPreviews.length > 0 && (
                     <div className="grid grid-cols-3 gap-2 mt-3">
                       {newPreviews.map((src, i) => (
                         <div key={i} className="relative group aspect-square rounded-xl overflow-hidden bg-dark-100 dark:bg-dark-700">
-                          <img src={src} alt={`New ${i + 1}`} className="w-full h-full object-cover" />
+                          {newFiles[i]?.type.startsWith('video/') ? (
+                            <video src={src} className="w-full h-full object-cover" muted />
+                          ) : (
+                            <img src={src} alt={`New ${i + 1}`} className="w-full h-full object-cover" />
+                          )}
                           <div className={`absolute top-1 ${isRTL ? 'right-1' : 'left-1'} bg-primary-500 text-white text-xs rounded px-1.5 py-0.5`}>
                             {t('admin.apartments.new_badge')}
                           </div>

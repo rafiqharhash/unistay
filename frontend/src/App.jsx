@@ -1,12 +1,15 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import ComparisonBar from './components/comparison/ComparisonBar';
+import AdminNavbar from './components/admin/AdminNavbar';
 import Home from './pages/Home';
 import DistrictPage from './pages/DistrictPage';
 import ApartmentDetail from './pages/ApartmentDetail';
 import SearchResults from './pages/SearchResults';
+import ApartmentComparison from './pages/ApartmentComparison';
 import AdminLogin from './pages/admin/Login';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminDistricts from './pages/admin/Districts';
@@ -15,17 +18,20 @@ import { Link } from 'react-router-dom';
 
 function App() {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-dark-900 transition-colors duration-300">
-      <Navbar />
-      <main className="flex-1">
+      {isAdminRoute ? <AdminNavbar /> : <Navbar />}
+      <main className="flex-1 flex flex-col">
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/districts/:id" element={<DistrictPage />} />
           <Route path="/apartments/:id" element={<ApartmentDetail />} />
           <Route path="/search" element={<SearchResults />} />
+          <Route path="/compare" element={<ApartmentComparison />} />
 
           {/* Admin Auth */}
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -73,7 +79,12 @@ function App() {
           />
         </Routes>
       </main>
-      <Footer />
+      {!isAdminRoute && (
+        <>
+          <ComparisonBar />
+          <Footer />
+        </>
+      )}
     </div>
   );
 }

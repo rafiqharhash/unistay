@@ -8,7 +8,7 @@ const Apartment = require('../models/Apartment');
 const uploadToCloudinary = (buffer, folder = 'unistay/districts') => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: 'image', quality: 'auto', fetch_format: 'auto' },
+      { folder, resource_type: 'auto', quality: 'auto', fetch_format: 'auto' },
       (error, result) => {
         if (error) return reject(error);
         resolve(result);
@@ -110,7 +110,7 @@ const createDistrict = async (req, res, next) => {
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    const { name, description, googleMapsUrl } = req.body;
+    const { name, nameAr, description, descriptionAr, googleMapsUrl } = req.body;
     let coverImage = '';
 
     if (req.file) {
@@ -118,7 +118,7 @@ const createDistrict = async (req, res, next) => {
       coverImage = result.secure_url;
     }
 
-    const district = await District.create({ name, description, coverImage, googleMapsUrl });
+    const district = await District.create({ name, nameAr, description, descriptionAr, coverImage, googleMapsUrl });
 
     res.status(201).json({
       success: true,
@@ -140,9 +140,11 @@ const updateDistrict = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'District not found.' });
     }
 
-    const { name, description, googleMapsUrl } = req.body;
+    const { name, nameAr, description, descriptionAr, googleMapsUrl } = req.body;
     if (name) district.name = name;
+    if (nameAr !== undefined) district.nameAr = nameAr;
     if (description !== undefined) district.description = description;
+    if (descriptionAr !== undefined) district.descriptionAr = descriptionAr;
     if (googleMapsUrl !== undefined) district.googleMapsUrl = googleMapsUrl;
 
     if (req.file) {

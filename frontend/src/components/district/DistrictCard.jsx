@@ -35,9 +35,8 @@ const DistrictCard = ({ district, index = 0 }) => {
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10 group-hover:from-black/90 transition-all duration-500" />
 
-        {/* Apartment Count Badge — always top-end */}
-        <div className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'}`}>
-          <div className="glass rounded-xl px-3 py-1.5 flex items-center gap-1.5">
+        <div className="absolute top-4 end-4">
+          <div className="glass rounded-xl px-3 py-1.5 flex items-center gap-1.5 whitespace-nowrap">
             <Building2 size={13} className="text-primary-400" />
             <span className="text-white text-xs font-semibold">
               {t('district_card.apartments_one', { count: district.apartmentCount ?? 0 })}
@@ -47,8 +46,8 @@ const DistrictCard = ({ district, index = 0 }) => {
 
         {/* Available Badge — top-start */}
         {district.availableCount > 0 && (
-          <div className={`absolute top-4 ${isRTL ? 'right-4' : 'left-4'}`}>
-            <div className="flex items-center gap-1 bg-emerald-500/90 backdrop-blur-sm rounded-full px-2.5 py-1">
+          <div className="absolute top-4 start-4">
+            <div className="flex items-center gap-1 bg-emerald-500/90 backdrop-blur-sm rounded-full px-2.5 py-1 whitespace-nowrap">
               <CheckCircle size={11} className="text-white" />
               <span className="text-white text-xs font-medium">
                 {t('district_card.available_one', { count: district.availableCount })}
@@ -62,10 +61,12 @@ const DistrictCard = ({ district, index = 0 }) => {
           <div className="flex items-end justify-between">
             <div>
               <h3 className="font-display font-bold text-xl text-white mb-1 group-hover:text-primary-300 transition-colors duration-300">
-                {district.name}
+                {isRTL && district.nameAr ? district.nameAr : district.name}
               </h3>
-              {district.description && (
-                <p className="text-white/70 text-sm line-clamp-1">{district.description}</p>
+              {(isRTL && district.descriptionAr ? district.descriptionAr : district.description) && (
+                <p className="text-white/70 text-sm line-clamp-1">
+                  {isRTL && district.descriptionAr ? district.descriptionAr : district.description}
+                </p>
               )}
               <div className="flex items-center gap-1.5 mt-2">
                 <MapPin size={13} className="text-primary-400" />

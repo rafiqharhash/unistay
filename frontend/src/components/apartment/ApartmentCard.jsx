@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  MapPin, BedDouble, Users, Wifi, Wind, Star,
+  MapPin, BedDouble, Users, Wind, Star,
   CheckCircle, XCircle, ChevronRight, ChevronLeft,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../context/LanguageContext';
+import CompareButton from '../comparison/CompareButton';
 
 const formatPrice = (price) =>
   new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(price);
@@ -34,6 +35,8 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
     >
       {/* Image */}
       <div className="relative overflow-hidden h-52 bg-dark-200 dark:bg-dark-700 shrink-0">
+        <CompareButton apartment={apartment} />
+        
         {firstImage ? (
           <img
             src={firstImage}
@@ -49,7 +52,7 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
 
         {/* Image count badge */}
         {apartment.images?.length > 1 && (
-          <div className={`absolute bottom-2 ${isRTL ? 'left-2' : 'right-2'} glass rounded-lg px-2 py-1 flex items-center gap-1`}>
+          <div className="absolute bottom-2 end-2 glass rounded-lg px-2 py-1 flex items-center gap-1">
             <span className="text-white text-xs font-medium">
               {t('apartment.photos', { count: apartment.images.length - 1 })}
             </span>
@@ -58,13 +61,13 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
 
         {/* Featured star */}
         {apartment.featured && (
-          <div className={`absolute top-3 ${isRTL ? 'right-3' : 'left-3'} bg-amber-400 text-amber-900 rounded-full p-1.5 shadow-md`}>
+          <div className="absolute top-3 start-3 bg-amber-400 text-amber-900 rounded-full p-1.5 shadow-md">
             <Star size={12} fill="currentColor" />
           </div>
         )}
 
         {/* Price badge */}
-        <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'} bg-primary-500 text-white rounded-xl px-3 py-1.5 font-bold text-sm shadow-glow-orange`}>
+        <div className="absolute top-3 end-3 bg-primary-500 text-white rounded-xl px-3 py-1.5 font-bold text-sm shadow-glow-orange">
           {formatPrice(apartment.price)}<span className="font-normal text-xs">{isRTL ? '/شهر' : '/mo'}</span>
         </div>
       </div>
@@ -89,7 +92,7 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
               building: apartment.buildingNo,
               apt: apartment.apartmentNo,
             })}
-            {apartment.districtId?.name ? `, ${apartment.districtId.name}` : ''}
+            {apartment.districtId?.name ? `, ${isRTL && apartment.districtId.nameAr ? apartment.districtId.nameAr : apartment.districtId.name}` : ''}
           </span>
         </div>
 
@@ -112,7 +115,6 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
             <Users size={14} className="text-dark-400" />
             {t('apartment.student_one', { count: apartment.capacity })}
           </span>
-          {apartment.wifi && <Wifi size={14} className="text-emerald-500" />}
           {apartment.airConditioning && <Wind size={14} className="text-blue-500" />}
         </div>
 

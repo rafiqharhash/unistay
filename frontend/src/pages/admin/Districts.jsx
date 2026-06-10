@@ -15,7 +15,9 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
   const { isRTL } = useLanguage();
   const [form, setForm] = useState({
     name: district?.name || '',
+    nameAr: district?.nameAr || '',
     description: district?.description || '',
+    descriptionAr: district?.descriptionAr || '',
     googleMapsUrl: district?.googleMapsUrl || '',
   });
   const [imageFile, setImageFile] = useState(null);
@@ -38,7 +40,9 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
     try {
       const fd = new FormData();
       fd.append('name', form.name.trim());
+      fd.append('nameAr', form.nameAr.trim());
       fd.append('description', form.description.trim());
+      fd.append('descriptionAr', form.descriptionAr.trim());
       fd.append('googleMapsUrl', form.googleMapsUrl.trim());
       if (imageFile) fd.append('coverImage', imageFile);
 
@@ -78,30 +82,59 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Name */}
-          <div>
-            <label className="label" htmlFor="district-name">{t('admin.districts.name_label')}</label>
-            <input
-              id="district-name"
-              type="text"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="input"
-              placeholder={t('admin.districts.name_placeholder')}
-              required
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="label" htmlFor="district-name">{t('admin.districts.name_label')} (English) *</label>
+              <input
+                id="district-name"
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="input"
+                placeholder={t('admin.districts.name_placeholder')}
+                required
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="district-name-ar">Name (Arabic) *</label>
+              <input
+                id="district-name-ar"
+                type="text"
+                value={form.nameAr}
+                onChange={(e) => setForm({ ...form, nameAr: e.target.value })}
+                className="input"
+                placeholder="الاسم بالعربية"
+                dir="rtl"
+                required
+              />
+            </div>
           </div>
 
           {/* Description */}
-          <div>
-            <label className="label" htmlFor="district-description">{t('admin.districts.description_label')}</label>
-            <textarea
-              id="district-description"
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="input resize-none"
-              rows={3}
-              placeholder={t('admin.districts.description_placeholder')}
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="label" htmlFor="district-description">{t('admin.districts.description_label')} (English)</label>
+              <textarea
+                id="district-description"
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                className="input resize-none"
+                rows={3}
+                placeholder={t('admin.districts.description_placeholder')}
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="district-description-ar">Description (Arabic)</label>
+              <textarea
+                id="district-description-ar"
+                value={form.descriptionAr}
+                onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })}
+                className="input resize-none"
+                rows={3}
+                placeholder="وصف الحي بالعربية..."
+                dir="rtl"
+              />
+            </div>
           </div>
 
           {/* Google Maps URL */}

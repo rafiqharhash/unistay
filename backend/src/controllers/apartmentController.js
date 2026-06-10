@@ -8,7 +8,7 @@ const District = require('../models/District');
 const uploadToCloudinary = (buffer, folder = 'unistay/apartments') => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: 'image', quality: 'auto', fetch_format: 'auto' },
+      { folder, resource_type: 'auto', quality: 'auto', fetch_format: 'auto' },
       (error, result) => {
         if (error) return reject(error);
         resolve(result);
@@ -163,10 +163,8 @@ const createApartment = async (req, res, next) => {
     }
 
     // Parse JSON fields
-    let amenities = [];
     let contactInfo = {};
     try {
-      if (req.body.amenities) amenities = JSON.parse(req.body.amenities);
       if (req.body.contactInfo) contactInfo = JSON.parse(req.body.contactInfo);
     } catch (_) {}
 
@@ -183,11 +181,14 @@ const createApartment = async (req, res, next) => {
       capacity: Number(req.body.capacity) || 1,
       gender: req.body.gender || 'mixed',
       wifi: req.body.wifi === 'true' || req.body.wifi === true,
+      desks: req.body.desks === 'true' || req.body.desks === true,
+      elevator: req.body.elevator === 'true' || req.body.elevator === true,
+      garden: req.body.garden === 'true' || req.body.garden === true,
       airConditioning: req.body.airConditioning === 'true' || req.body.airConditioning === true,
+      fans: req.body.fans === 'true' || req.body.fans === true,
       availableBeds: Number(req.body.availableBeds) || 0,
       available: req.body.available !== 'false' && req.body.available !== false,
       featured: req.body.featured === 'true' || req.body.featured === true,
-      amenities,
       contactInfo,
     });
 
@@ -236,10 +237,8 @@ const updateApartment = async (req, res, next) => {
     }
 
     // Parse JSON fields
-    let amenities = apartment.amenities;
     let contactInfo = apartment.contactInfo;
     try {
-      if (req.body.amenities) amenities = JSON.parse(req.body.amenities);
       if (req.body.contactInfo) contactInfo = JSON.parse(req.body.contactInfo);
     } catch (_) {}
 
@@ -258,11 +257,13 @@ const updateApartment = async (req, res, next) => {
     if (req.body.rooms !== undefined) apartment.rooms = Number(req.body.rooms);
     if (req.body.gender !== undefined) apartment.gender = req.body.gender;
     if (req.body.wifi !== undefined) apartment.wifi = req.body.wifi === 'true' || req.body.wifi === true;
+    if (req.body.desks !== undefined) apartment.desks = req.body.desks === 'true' || req.body.desks === true;
+    if (req.body.elevator !== undefined) apartment.elevator = req.body.elevator === 'true' || req.body.elevator === true;
+    if (req.body.garden !== undefined) apartment.garden = req.body.garden === 'true' || req.body.garden === true;
     if (req.body.airConditioning !== undefined) apartment.airConditioning = req.body.airConditioning === 'true' || req.body.airConditioning === true;
+    if (req.body.fans !== undefined) apartment.fans = req.body.fans === 'true' || req.body.fans === true;
     if (req.body.available !== undefined) apartment.available = req.body.available === 'true' || req.body.available === true;
     if (req.body.featured !== undefined) apartment.featured = req.body.featured === 'true' || req.body.featured === true;
-
-    apartment.amenities = amenities;
     apartment.contactInfo = contactInfo;
     apartment.images = [...existingImages, ...newImageUrls];
 

@@ -8,6 +8,16 @@ import 'swiper/css/pagination';
 import 'swiper/css/thumbs';
 import 'swiper/css/zoom';
 
+const isVideo = (url) => {
+  if (!url) return false;
+  return url.match(/\.(mp4|webm|mov|mkv)$/i) !== null;
+};
+
+const getVideoThumbnail = (url) => {
+  if (!url) return '';
+  return url.replace(/\.(mp4|webm|mov|mkv)$/i, '.jpg');
+};
+
 const ImageCarousel = ({ images = [], title = '' }) => {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -45,20 +55,31 @@ const ImageCarousel = ({ images = [], title = '' }) => {
           {images.map((img, i) => (
             <SwiperSlide key={i}>
               <div className="relative w-full h-full">
-                <img
-                  src={img}
-                  alt={`${title} - image ${i + 1}`}
-                  className="w-full h-full object-cover"
-                  loading={i === 0 ? 'eager' : 'lazy'}
-                />
-                <button
-                  onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
-                  id={`zoom-image-${i}`}
-                  className="absolute bottom-3 right-3 glass rounded-xl p-2 text-white hover:bg-white/20 transition-colors"
-                  aria-label="View full size"
-                >
-                  <ZoomIn size={18} />
-                </button>
+                {isVideo(img) ? (
+                  <video
+                    src={img}
+                    className="w-full h-full object-cover"
+                    controls
+                    preload={i === 0 ? "auto" : "metadata"}
+                  />
+                ) : (
+                  <>
+                    <img
+                      src={img}
+                      alt={`${title} - image ${i + 1}`}
+                      className="w-full h-full object-cover"
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                    />
+                    <button
+                      onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
+                      id={`zoom-image-${i}`}
+                      className="absolute bottom-3 right-3 glass rounded-xl p-2 text-white hover:bg-white/20 transition-colors"
+                      aria-label="View full size"
+                    >
+                      <ZoomIn size={18} />
+                    </button>
+                  </>
+                )}
               </div>
             </SwiperSlide>
           ))}
@@ -78,7 +99,7 @@ const ImageCarousel = ({ images = [], title = '' }) => {
           {images.map((img, i) => (
             <SwiperSlide key={i} className="cursor-pointer">
               <img
-                src={img}
+                src={isVideo(img) ? getVideoThumbnail(img) : img}
                 alt={`Thumbnail ${i + 1}`}
                 className="w-full h-16 object-cover rounded-xl opacity-50 hover:opacity-100 transition-opacity duration-200 [.swiper-slide-thumb-active_&]:opacity-100 [.swiper-slide-thumb-active_&]:ring-2 [.swiper-slide-thumb-active_&]:ring-primary-500"
                 loading="lazy"
@@ -113,12 +134,21 @@ const ImageCarousel = ({ images = [], title = '' }) => {
             {images.map((img, i) => (
               <SwiperSlide key={i}>
                 <div className="swiper-zoom-container flex items-center justify-center h-screen">
-                  <img
-                    src={img}
-                    alt={`${title} - ${i + 1}`}
-                    className="max-w-full max-h-[90vh] object-contain"
-                    onClick={(e) => e.stopPropagation()}
-                  />
+                  {isVideo(img) ? (
+                    <video
+                      src={img}
+                      controls
+                      className="max-w-full max-h-[90vh] object-contain"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <img
+                      src={img}
+                      alt={`${title} - ${i + 1}`}
+                      className="max-w-full max-h-[90vh] object-contain"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  )}
                 </div>
               </SwiperSlide>
             ))}

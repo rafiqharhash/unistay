@@ -43,7 +43,8 @@ router.post(
     body('districtId').notEmpty().withMessage('District is required.'),
     body('title').notEmpty().withMessage('Title is required.'),
     body('price').isNumeric().withMessage('Price must be a number.'),
-    body('location').notEmpty().withMessage('Location is required.'),
+    body('buildingNo').notEmpty().withMessage('Building number is required.'),
+    body('apartmentNo').notEmpty().withMessage('Apartment number is required.'),
     body('rooms').isNumeric().withMessage('Rooms must be a number.'),
   ],
   createApartment

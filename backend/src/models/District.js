@@ -4,8 +4,13 @@ const districtSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'District name is required'],
+      required: [true, 'Name is required'],
+      trim: true,
       unique: true,
+    },
+    nameAr: {
+      type: String,
+      default: '',
       trim: true,
     },
     coverImage: {
@@ -18,6 +23,11 @@ const districtSchema = new mongoose.Schema(
       trim: true,
     },
     description: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    descriptionAr: {
       type: String,
       default: '',
       trim: true,

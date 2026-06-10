@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  ArrowLeft, ArrowRight, MapPin, BedDouble, Users, Wifi, Wind, Phone, Mail,
+  ArrowLeft, ArrowRight, MapPin, BedDouble, Users, Wind, Phone, Mail,
   MessageCircle, CheckCircle, XCircle, Star, Hash, Calendar,
   ExternalLink, AlertCircle, Share2,
 } from 'lucide-react';
@@ -37,7 +37,7 @@ const InfoChip = ({ icon: Icon, label, value, color = 'text-primary-500' }) => (
 const ApartmentDetail = () => {
   const { id } = useParams();
   const { t } = useTranslation();
-  const { isRTL, language } = useLanguage();
+  const { isRTL } = useLanguage();
   const [apartment, setApartment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -118,7 +118,7 @@ const ApartmentDetail = () => {
                 to={`/districts/${apartment.districtId._id}`}
                 className="text-dark-500 hover:text-primary-500 transition-colors"
               >
-                {apartment.districtId.name}
+                {isRTL && apartment.districtId.nameAr ? apartment.districtId.nameAr : apartment.districtId.name}
               </Link>
               <span className="text-dark-300">/</span>
             </>
@@ -186,7 +186,7 @@ const ApartmentDetail = () => {
                     building: apartment.buildingNo,
                     apt: apartment.apartmentNo,
                   })}
-                  {apartment.districtId ? `, ${apartment.districtId.name}` : ''}
+                  {apartment.districtId ? `, ${isRTL && apartment.districtId.nameAr ? apartment.districtId.nameAr : apartment.districtId.name}` : ''}
                 </span>
               </div>
             </motion.div>
@@ -204,15 +204,9 @@ const ApartmentDetail = () => {
                 value={t('apartment.student_one', { count: apartment.capacity })}
               />
               <InfoChip
-                icon={Wifi}
-                label={t('apartment.wifi_label')}
-                value={apartment.wifi ? t('apartment.wifi_included') : t('apartment.wifi_not_included')}
-                color={apartment.wifi ? 'text-emerald-500' : 'text-dark-400'}
-              />
-              <InfoChip
                 icon={Wind}
                 label={t('apartment.ac_label')}
-                value={apartment.airConditioning ? t('apartment.ac_available') : t('apartment.ac_not_available')}
+                value={apartment.airConditioning ? t('apartment.feature_included') : t('apartment.feature_not_included')}
                 color={apartment.airConditioning ? 'text-blue-500' : 'text-dark-400'}
               />
             </div>
@@ -242,24 +236,33 @@ const ApartmentDetail = () => {
             )}
 
             {/* Amenities */}
-            {apartment.amenities?.length > 0 && (
-              <div>
-                <h2 className="font-display font-semibold text-lg text-dark-900 dark:text-white mb-3">
-                  {t('apartment.amenities_title')}
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {apartment.amenities.map((amenity) => (
-                    <span
-                      key={amenity}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-xl text-sm font-medium"
-                    >
-                      <CheckCircle size={13} />
-                      {amenity}
-                    </span>
-                  ))}
-                </div>
+            <div>
+              <h2 className="font-display font-semibold text-lg text-dark-900 dark:text-white mb-3">
+                {t('apartment.amenities_title')}
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { key: 'wifi', label: t('apartment.wifi_label'), value: apartment.wifi },
+                  { key: 'desks', label: t('apartment.desks_label'), value: apartment.desks },
+                  { key: 'elevator', label: t('apartment.elevator_label'), value: apartment.elevator },
+                  { key: 'garden', label: t('apartment.garden_label'), value: apartment.garden },
+                  { key: 'ac', label: t('apartment.ac_label'), value: apartment.airConditioning },
+                  { key: 'fans', label: t('apartment.fans_label'), value: apartment.fans },
+                ].map((item) => (
+                  <span
+                    key={item.key}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium ${
+                      item.value
+                        ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                        : 'bg-dark-50 dark:bg-dark-800 text-dark-400'
+                    }`}
+                  >
+                    {item.value ? <CheckCircle size={13} /> : <XCircle size={13} />}
+                    {item.label}
+                  </span>
+                ))}
               </div>
-            )}
+            </div>
 
             {/* Meta */}
             <div className="flex items-center gap-2 text-xs text-dark-400 dark:text-dark-500">
