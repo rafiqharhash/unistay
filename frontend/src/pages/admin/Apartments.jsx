@@ -68,15 +68,16 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
     const files = Array.from(e.target.files);
 
     // Check total count limit
-    if (existingImages.length + newFiles.length + files.length > 10) {
-      toast.error(t('admin.apartments.max_images') || 'Maximum 10 images allowed.');
+    if (existingImages.length + newFiles.length + files.length > 25) {
+      const msg = t('admin.apartments.max_images', { defaultValue: 'Maximum 25 images allowed.' });
+      toast.error(msg === 'admin.apartments.max_images' ? 'Maximum 25 images allowed.' : msg);
       return;
     }
 
     const validFiles = files.filter((f) => {
-      // Check file size (limit to 5MB to avoid HTTP/2 proxy limits on Railway)
-      if (f.size > 5 * 1024 * 1024) {
-        toast.error(`${f.name} is larger than 5MB and was skipped.`);
+      // Check file size (limit to 4MB to avoid HTTP/2 proxy limits on Railway)
+      if (f.size > 4 * 1024 * 1024) {
+        toast.error(`${f.name} is larger than 4MB and was skipped.`);
         return false;
       }
       return f.type.startsWith('image/') || f.type.startsWith('video/');
