@@ -49,7 +49,8 @@ const ApartmentDetail = () => {
     apartmentAPI.getOne(id)
       .then((res) => {
         setApartment(res.data.data);
-        document.title = `${res.data.data.title} - UniStay`;
+        const apt = res.data.data;
+        document.title = `Floor ${apt.floor} - UniStay`;
       })
       .catch(() => setError(t('apartment.not_found_title')))
       .finally(() => setLoading(false));
@@ -182,10 +183,12 @@ const ApartmentDetail = () => {
               <div className="flex items-center gap-2 text-dark-500 dark:text-dark-400 text-sm">
                 <MapPin size={14} className="text-primary-500 shrink-0" />
                 <span>
-                  {t('apartment.building_apt', {
-                    building: apartment.buildingNo,
-                    apt: apartment.apartmentNo,
-                  })}
+                  {apartment.buildingNo && apartment.apartmentNo
+                    ? t('apartment.building_apt', {
+                        building: apartment.buildingNo,
+                        apt: apartment.apartmentNo,
+                      })
+                    : apartment.buildingNo || apartment.apartmentNo || ''}
                   {apartment.districtId ? `, ${isRTL && apartment.districtId.nameAr ? apartment.districtId.nameAr : apartment.districtId.name}` : ''}
                 </span>
               </div>

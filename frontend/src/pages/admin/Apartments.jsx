@@ -13,7 +13,11 @@ import { apartmentAPI, districtAPI } from '../../api/axios';
 
 const isVideo = (url) => {
   if (!url) return false;
-  return url.match(/\.(mp4|webm|mov|mkv)$/i) !== null;
+  // Check file extensions
+  if (url.match(/\.(mp4|webm|mov|mkv)(\?.*)?$/i)) return true;
+  // Cloudinary video URLs contain /video/ in the path
+  if (url.includes('res.cloudinary.com') && url.includes('/video/')) return true;
+  return false;
 };
 
 const formatPrice = (p) =>
@@ -102,6 +106,11 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
       fd.append('availableBeds', form.availableBeds);
       fd.append('available', form.available);
       fd.append('featured', form.featured);
+      fd.append('contactInfo', JSON.stringify({
+        phone: form.contactPhone || '',
+        whatsapp: form.contactWhatsapp || '',
+        email: form.contactEmail || '',
+      }));
       if (apartment) {
         fd.append('existingImages', JSON.stringify(existingImages));
       }
@@ -652,7 +661,11 @@ const AdminApartments = () => {
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg overflow-hidden bg-dark-100 dark:bg-dark-700 shrink-0">
                             {apt.images?.[0] ? (
-                              <img src={apt.images[0]} alt={`Apartment ${apt.apartmentId}`} className="w-full h-full object-cover" />
+                              isVideo(apt.images[0]) ? (
+                                <video src={apt.images[0]} className="w-full h-full object-cover" muted />
+                              ) : (
+                                <img src={apt.images[0]} alt={`Apartment ${apt.apartmentId}`} className="w-full h-full object-cover" />
+                              )
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
                                 <Building2 size={14} className="text-dark-400" />

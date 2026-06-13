@@ -111,7 +111,7 @@
     "listed_on": "Listed on {{date}}",
     "not_found_title": "Apartment Not Found",
     "link_copied": "Link copied to clipboard!",
-    "building_apt": "Bldg {{building}}, Apt {{apt}}",
+    "building_apt": "Building {{building}}, Code {{apt}}",
     "featured_label": "Featured",
     "whatsapp_inquire": "Inquire on WhatsApp"
   },

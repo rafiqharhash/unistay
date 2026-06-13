@@ -90,10 +90,12 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
         <div className="flex items-center gap-1.5 text-sm text-dark-500 dark:text-dark-400">
           <MapPin size={13} className="text-primary-500 shrink-0" />
           <span className="line-clamp-1">
-            {t('apartment.building_apt', {
-              building: apartment.buildingNo,
-              apt: apartment.apartmentNo,
-            })}
+            {apartment.buildingNo && apartment.apartmentNo
+              ? t('apartment.building_apt', {
+                  building: apartment.buildingNo,
+                  apt: apartment.apartmentNo,
+                })
+              : apartment.buildingNo || apartment.apartmentNo || ''}
             {apartment.districtId?.name ? `, ${isRTL && apartment.districtId.nameAr ? apartment.districtId.nameAr : apartment.districtId.name}` : ''}
           </span>
         </div>
