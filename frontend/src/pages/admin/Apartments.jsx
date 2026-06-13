@@ -51,6 +51,9 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
     availableBeds: apartment?.availableBeds || 0,
     available: apartment?.available ?? true,
     featured: apartment?.featured || false,
+    contactPhone: apartment?.contactInfo?.phone || '',
+    contactWhatsapp: apartment?.contactInfo?.whatsapp || '',
+    contactEmail: apartment?.contactInfo?.email || '',
   });
 
   const [newFiles, setNewFiles] = useState([]);
@@ -80,7 +83,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.districtId || !form.floor || !form.price || !form.rooms) {
+    if (!form.districtId || !form.floor || !form.price || !form.rooms || !form.buildingNo || !form.apartmentNo) {
       toast.error(t('admin.apartments.fill_required'));
       return;
     }
@@ -125,7 +128,12 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
       }
       onSaved();
     } catch (err) {
-      toast.error(err.response?.data?.message || t('admin.apartments.op_failed'));
+      // express-validator returns errors array, Mongoose returns message
+      const serverMsg =
+        err.response?.data?.message ||
+        err.response?.data?.errors?.[0]?.msg ||
+        t('admin.apartments.op_failed');
+      toast.error(serverMsg);
     } finally {
       setLoading(false);
     }

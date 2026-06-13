@@ -12,12 +12,19 @@ const generateApartmentId = async () => {
   
   let isUnique = false;
   let newId = '';
-  while (!isUnique) {
+  let attempts = 0;
+  while (!isUnique && attempts < 50) {
     const idStr = `${getLetter()}${getNumber()}`;
     
     newId = idStr;
     const existing = await Apartment.findOne({ apartmentId: newId });
     if (!existing) isUnique = true;
+    attempts++;
+  }
+
+  // Fallback to timestamp if extremely unlucky or DB is full of A-C 1-99
+  if (!isUnique) {
+    newId = `${getLetter()}${getNumber()}-${Date.now().toString().slice(-4)}`;
   }
   return newId;
 };
