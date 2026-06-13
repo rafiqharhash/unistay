@@ -66,10 +66,28 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    const validFiles = files.filter((f) => f.type.startsWith('image/') || f.type.startsWith('video/'));
+
+    // Check total count limit
+    if (existingImages.length + newFiles.length + files.length > 10) {
+      toast.error(t('admin.apartments.max_images') || 'Maximum 10 images allowed.');
+      return;
+    }
+
+    const validFiles = files.filter((f) => {
+      // Check file size (limit to 5MB to avoid HTTP/2 proxy limits on Railway)
+      if (f.size > 5 * 1024 * 1024) {
+        toast.error(`${f.name} is larger than 5MB and was skipped.`);
+        return false;
+      }
+      return f.type.startsWith('image/') || f.type.startsWith('video/');
+    });
+
     if (validFiles.length !== files.length) toast.error(t('admin.apartments.some_skipped'));
     setNewFiles((prev) => [...prev, ...validFiles]);
     setNewPreviews((prev) => [...prev, ...validFiles.map((f) => URL.createObjectURL(f))]);
+
+    // Reset file input so same files can be selected again if needed
+    if (fileRef.current) fileRef.current.value = '';
   };
 
   const removeNewImage = (index) => {
@@ -140,20 +158,20 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
   };
 
   const tabs = [
-    { id: 'basic',   label: t('admin.apartments.tab_basic')   },
+    { id: 'basic', label: t('admin.apartments.tab_basic') },
     { id: 'details', label: t('admin.apartments.tab_details') },
-    { id: 'images',  label: t('admin.apartments.tab_images')  },
+    { id: 'images', label: t('admin.apartments.tab_images') },
   ];
 
   const toggleFields = [
-    { key: 'wifi',             label: t('admin.apartments.wifi_toggle')      },
-    { key: 'desks',            label: t('admin.apartments.desks_toggle')     },
-    { key: 'elevator',         label: t('admin.apartments.elevator_toggle')  },
-    { key: 'garden',           label: t('admin.apartments.garden_toggle')    },
-    { key: 'airConditioning',  label: t('admin.apartments.ac_toggle')        },
-    { key: 'fans',             label: t('admin.apartments.fans_toggle')      },
-    { key: 'available',        label: t('admin.apartments.available_toggle') },
-    { key: 'featured',         label: t('admin.apartments.featured_toggle')  },
+    { key: 'wifi', label: t('admin.apartments.wifi_toggle') },
+    { key: 'desks', label: t('admin.apartments.desks_toggle') },
+    { key: 'elevator', label: t('admin.apartments.elevator_toggle') },
+    { key: 'garden', label: t('admin.apartments.garden_toggle') },
+    { key: 'airConditioning', label: t('admin.apartments.ac_toggle') },
+    { key: 'fans', label: t('admin.apartments.fans_toggle') },
+    { key: 'available', label: t('admin.apartments.available_toggle') },
+    { key: 'featured', label: t('admin.apartments.featured_toggle') },
   ];
 
   return (
@@ -181,11 +199,10 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
               type="button"
               onClick={() => setActiveTab(tab.id)}
               id={`tab-${tab.id}`}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px ${
-                activeTab === tab.id
+              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px ${activeTab === tab.id
                   ? 'border-primary-500 text-primary-500'
                   : 'border-transparent text-dark-500 hover:text-dark-700 dark:hover:text-dark-300'
-              }`}
+                }`}
             >
               {tab.label}
             </button>
@@ -362,11 +379,10 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                       type="button"
                       id={`toggle-${key}`}
                       onClick={() => setForm({ ...form, [key]: !form[key] })}
-                      className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all ${
-                        form[key]
+                      className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all ${form[key]
                           ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
                           : 'border-dark-200 dark:border-dark-600 text-dark-500 dark:text-dark-400'
-                      }`}
+                        }`}
                     >
                       <span className="text-sm font-medium">{label}</span>
                       {form[key] ? <ToggleRight size={22} className="text-primary-500" /> : <ToggleLeft size={22} />}
@@ -756,9 +772,8 @@ const AdminApartments = () => {
                   key={page}
                   onClick={() => handlePageChange(page)}
                   id={`admin-page-${page}`}
-                  className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${
-                    page === currentPage ? 'bg-primary-500 text-white' : 'btn-ghost'
-                  }`}
+                  className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${page === currentPage ? 'bg-primary-500 text-white' : 'btn-ghost'
+                    }`}
                 >
                   {page}
                 </button>
