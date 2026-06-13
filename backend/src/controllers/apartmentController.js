@@ -157,6 +157,24 @@ const getFeaturedApartments = async (req, res, next) => {
 // @desc    Get single apartment
 // @route   GET /api/apartments/:id
 // @access  Public
+// @desc    Upload a single image to Cloudinary (used for sequential background uploading)
+// @route   POST /api/admin/upload-image
+// @access  Protected
+const uploadImage = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No image provided.' });
+    }
+    const result = await uploadToCloudinary(req.file.buffer);
+    res.status(200).json({
+      success: true,
+      data: result.secure_url,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getApartment = async (req, res, next) => {
   try {
     const apartment = await Apartment.findById(req.params.id).populate(
@@ -191,12 +209,20 @@ const createApartment = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Selected district does not exist.' });
     }
 
-    // Upload images to Cloudinary
+    // Upload images to Cloudinary if they were sent directly in the request (fallback)
     let images = [];
     if (req.files && req.files.length > 0) {
       const uploadPromises = req.files.map((file) => uploadToCloudinary(file.buffer));
       const results = await Promise.all(uploadPromises);
       images = results.map((r) => r.secure_url);
+    }
+    
+    // Add any pre-uploaded images sent as JSON array
+    if (req.body.uploadedImages) {
+      try {
+        const preUploaded = JSON.parse(req.body.uploadedImages);
+        images = [...images, ...preUploaded];
+      } catch (_) {}
     }
 
     // Parse JSON fields
@@ -261,17 +287,24 @@ const updateApartment = async (req, res, next) => {
       newImageUrls = results.map((r) => r.secure_url);
     }
 
-    // Handle existing images - admin sends which images to keep
+    // Handle existing images and pre-uploaded new images sent from frontend
     let existingImages = apartment.images;
     if (req.body.existingImages !== undefined) {
       try {
         const toKeep = JSON.parse(req.body.existingImages);
-        // Delete images that are being removed
-        const toDelete = apartment.images.filter((img) => !toKeep.includes(img));
-        for (const imgUrl of toDelete) {
-          await deleteFromCloudinary(imgUrl);
-        }
+        
+        const removedImages = existingImages.filter((img) => !toKeep.includes(img));
+        const deletePromises = removedImages.map((img) => deleteFromCloudinary(img));
+        await Promise.all(deletePromises);
+
         existingImages = toKeep;
+      } catch (_) {}
+    }
+    
+    if (req.body.uploadedImages !== undefined) {
+      try {
+        const preUploaded = JSON.parse(req.body.uploadedImages);
+        newImageUrls = [...newImageUrls, ...preUploaded];
       } catch (_) {}
     }
 
@@ -386,11 +419,12 @@ const toggleAvailable = async (req, res, next) => {
 
 module.exports = {
   getApartments,
-  getFeaturedApartments,
   getApartment,
+  getFeaturedApartments,
   createApartment,
   updateApartment,
   deleteApartment,
   toggleFeatured,
   toggleAvailable,
+  uploadImage,
 };

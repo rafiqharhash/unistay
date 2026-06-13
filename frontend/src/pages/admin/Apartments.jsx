@@ -136,7 +136,25 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
       if (apartment) {
         fd.append('existingImages', JSON.stringify(existingImages));
       }
-      newFiles.forEach((f) => fd.append('images', f));
+
+      // Upload new files one by one to avoid large payloads that crash the server
+      const uploadedImageUrls = [];
+      if (newFiles.length > 0) {
+        toast.info(t('admin.apartments.uploading_images', { defaultValue: 'Uploading images...' }));
+        for (let i = 0; i < newFiles.length; i++) {
+          const imageFd = new FormData();
+          imageFd.append('image', newFiles[i]);
+          const response = await apartmentAPI.uploadImage(imageFd);
+          if (response.data?.success && response.data?.data) {
+            uploadedImageUrls.push(response.data.data);
+          }
+        }
+      }
+      
+      // Append the successfully uploaded new image URLs
+      if (uploadedImageUrls.length > 0) {
+        fd.append('uploadedImages', JSON.stringify(uploadedImageUrls));
+      }
 
       if (apartment) {
         await apartmentAPI.update(apartment._id, fd);

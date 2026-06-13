@@ -14,6 +14,7 @@ const {
   deleteApartment,
   toggleFeatured,
   toggleAvailable,
+  uploadImage,
 } = require('../controllers/apartmentController');
 
 const router = express.Router();
@@ -35,6 +36,8 @@ router.put('/districts/:id', upload.single('coverImage'), updateDistrict);
 router.delete('/districts/:id', deleteDistrict);
 
 // Apartment management
+router.post('/upload-image', upload.single('image'), uploadImage);
+
 router.post(
   '/apartments',
   upload.array('images', 10),

@@ -55,6 +55,7 @@ export const apartmentAPI = {
   delete: (id) => api.delete(`/admin/apartments/${id}`),
   toggleFeatured: (id) => api.patch(`/admin/apartments/${id}/toggle-featured`),
   toggleAvailable: (id) => api.patch(`/admin/apartments/${id}/toggle-available`),
+  uploadImage: (data) => api.post('/admin/upload-image', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
 
 // ─── Admin ───────────────────────────────────────────────────────────────────
