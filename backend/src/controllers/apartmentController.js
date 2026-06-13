@@ -32,14 +32,25 @@ const generateApartmentId = async () => {
 // Helper: upload buffer to Cloudinary
 const uploadToCloudinary = (buffer, folder = 'unistay/apartments') => {
   return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: 'auto', quality: 'auto', fetch_format: 'auto' },
-      (error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      }
-    );
-    streamifier.createReadStream(buffer).pipe(stream);
+    try {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder, resource_type: 'auto', quality: 'auto', fetch_format: 'auto' },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
+      
+      const readStream = streamifier.createReadStream(buffer);
+      
+      // Prevent unhandled stream errors from crashing Node.js
+      readStream.on('error', reject);
+      stream.on('error', reject);
+      
+      readStream.pipe(stream);
+    } catch (err) {
+      reject(err);
+    }
   });
 };
 
