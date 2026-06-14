@@ -31,6 +31,11 @@ app.use('/api/districts', districtRoutes);
 app.use('/api/apartments', apartmentRoutes);
 app.use('/api/admin', adminRoutes);
 
+// Root Route to verify server is running
+app.get('/', (req, res) => {
+  res.status(200).json({ success: true, message: 'UniStay API is perfectly running!' });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'UniStay API is running 🚀' });
