@@ -12,6 +12,7 @@ const protect = async (req, res, next) => {
   }
 
   if (!token) {
+    req.resume();
     return res.status(401).json({
       success: false,
       message: 'Access denied. No token provided.',
@@ -23,6 +24,7 @@ const protect = async (req, res, next) => {
     const admin = await Admin.findById(decoded.id).select('-passwordHash');
 
     if (!admin) {
+      req.resume();
       return res.status(401).json({
         success: false,
         message: 'Token is no longer valid.',
@@ -32,6 +34,7 @@ const protect = async (req, res, next) => {
     req.admin = admin;
     next();
   } catch (error) {
+    req.resume();
     return res.status(401).json({
       success: false,
       message: 'Invalid or expired token.',

@@ -102,7 +102,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.districtId || !form.floor || !form.price || !form.rooms || !form.buildingNo || !form.apartmentNo) {
+    if (!form.apartmentId || !form.districtId || !form.floor || !form.price || !form.rooms || !form.buildingNo || !form.apartmentNo) {
       toast.error(t('admin.apartments.fill_required'));
       return;
     }
@@ -165,10 +165,16 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
       }
       onSaved();
     } catch (err) {
+      console.error('API Error:', err);
+      if (err.response) {
+        console.error('Response Data:', err.response.data);
+      }
+      
       // express-validator returns errors array, Mongoose returns message
       const serverMsg =
         err.response?.data?.message ||
         err.response?.data?.errors?.[0]?.msg ||
+        err.message ||
         t('admin.apartments.op_failed');
       toast.error(serverMsg);
     } finally {
@@ -245,9 +251,10 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                         id="apt-id"
                         type="text"
                         value={form.apartmentId}
-                        className={`input uppercase bg-dark-50 dark:bg-dark-800 text-dark-400 cursor-not-allowed ${isRTL ? 'pr-8' : 'pl-8'}`}
-                        placeholder={apartment ? '' : 'Auto-generated on save'}
-                        disabled
+                        onChange={(e) => setForm({ ...form, apartmentId: e.target.value })}
+                        className={`input uppercase bg-white dark:bg-dark-900 text-dark-900 dark:text-white ${isRTL ? 'pr-8' : 'pl-8'}`}
+                        placeholder={t('admin.apartments.id_placeholder', { defaultValue: 'Enter Apartment ID (e.g. A12)' })}
+                        required
                       />
                     </div>
                   </div>

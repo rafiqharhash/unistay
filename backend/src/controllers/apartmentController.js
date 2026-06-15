@@ -4,30 +4,7 @@ const { validationResult } = require('express-validator');
 const Apartment = require('../models/Apartment');
 const District = require('../models/District');
 
-// Helper to generate a random ID: A-C + 1-99
-const generateApartmentId = async () => {
-  const letters = 'ABC';
-  const getLetter = () => letters[Math.floor(Math.random() * letters.length)];
-  const getNumber = () => Math.floor(Math.random() * 99) + 1;
-  
-  let isUnique = false;
-  let newId = '';
-  let attempts = 0;
-  while (!isUnique && attempts < 50) {
-    const idStr = `${getLetter()}${getNumber()}`;
-    
-    newId = idStr;
-    const existing = await Apartment.findOne({ apartmentId: newId });
-    if (!existing) isUnique = true;
-    attempts++;
-  }
 
-  // Fallback to timestamp if extremely unlucky or DB is full of A-C 1-99
-  if (!isUnique) {
-    newId = `${getLetter()}${getNumber()}-${Date.now().toString().slice(-4)}`;
-  }
-  return newId;
-};
 
 // Helper: upload buffer to Cloudinary
 const uploadToCloudinary = (buffer, folder = 'unistay/apartments') => {
@@ -231,10 +208,8 @@ const createApartment = async (req, res, next) => {
       if (req.body.contactInfo) contactInfo = JSON.parse(req.body.contactInfo);
     } catch (_) {}
 
-    const generatedId = await generateApartmentId();
-
     const apartment = await Apartment.create({
-      apartmentId: generatedId,
+      apartmentId: req.body.apartmentId,
       districtId: req.body.districtId,
       floor: Number(req.body.floor),
       description: req.body.description,
@@ -315,7 +290,7 @@ const updateApartment = async (req, res, next) => {
     } catch (_) {}
 
     const updatableFields = [
-      'districtId', 'description', 'rooms',
+      'apartmentId', 'districtId', 'description', 'rooms',
       'buildingNo', 'apartmentNo',
     ];
     updatableFields.forEach((field) => {

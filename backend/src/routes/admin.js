@@ -42,6 +42,7 @@ router.post(
   '/apartments',
   upload.array('images', 10),
   [
+    body('apartmentId').notEmpty().withMessage('Apartment ID is required.'),
     body('districtId').notEmpty().withMessage('District is required.'),
     body('floor').isNumeric().withMessage('Floor must be a number.'),
     body('price').isNumeric().withMessage('Price must be a number.'),
