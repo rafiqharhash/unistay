@@ -40,19 +40,19 @@ router.post('/upload-image', upload.single('image'), uploadImage);
 
 router.post(
   '/apartments',
-  upload.array('images', 10),
+  upload.array('images', 50),
   [
-    body('apartmentId').notEmpty().withMessage('Apartment ID is required.'),
+    body('apartmentId').optional().trim(),
     body('districtId').notEmpty().withMessage('District is required.'),
-    body('floor').isNumeric().withMessage('Floor must be a number.'),
+    body('floor').optional().isNumeric().withMessage('Floor must be a number.'),
     body('price').isNumeric().withMessage('Price must be a number.'),
-    body('buildingNo').notEmpty().withMessage('Building number is required.'),
-    body('apartmentNo').notEmpty().withMessage('Apartment number is required.'),
-    body('rooms').isNumeric().withMessage('Rooms must be a number.'),
+    body('buildingNo').optional().trim(),
+    body('apartmentNo').optional().trim(),
+    body('rooms').optional().isNumeric().withMessage('Rooms must be a number.'),
   ],
   createApartment
 );
-router.put('/apartments/:id', upload.array('images', 10), updateApartment);
+router.put('/apartments/:id', upload.array('images', 50), updateApartment);
 router.delete('/apartments/:id', deleteApartment);
 router.patch('/apartments/:id/toggle-featured', toggleFeatured);
 router.patch('/apartments/:id/toggle-available', toggleAvailable);

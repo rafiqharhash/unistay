@@ -75,9 +75,9 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
     }
 
     const validFiles = files.filter((f) => {
-      // Check file size (limit to 4MB to avoid HTTP/2 proxy limits on Railway)
-      if (f.size > 4 * 1024 * 1024) {
-        toast.error(`${f.name} is larger than 4MB and was skipped.`);
+      // Check file size (limit to 100MB)
+      if (f.size > 100 * 1024 * 1024) {
+        toast.error(`${f.name} is larger than 100MB and was skipped.`);
         return false;
       }
       return f.type.startsWith('image/') || f.type.startsWith('video/');
@@ -102,7 +102,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.apartmentId || !form.districtId || !form.floor || !form.price || !form.rooms || !form.buildingNo || !form.apartmentNo) {
+    if (!form.districtId || !form.price) {
       toast.error(t('admin.apartments.fill_required'));
       return;
     }
@@ -110,11 +110,12 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
     try {
       const fd = new FormData();
       if (form.apartmentId) fd.append('apartmentId', form.apartmentId);
+      else fd.append('apartmentId', `APT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`);
       fd.append('districtId', form.districtId);
-      fd.append('floor', form.floor);
+      fd.append('floor', form.floor || 1);
       fd.append('description', form.description);
-      fd.append('buildingNo', form.buildingNo);
-      fd.append('apartmentNo', form.apartmentNo);
+      fd.append('buildingNo', form.buildingNo || "N/A");
+      fd.append('apartmentNo', form.apartmentNo || "N/A");
       fd.append('price', form.price);
       fd.append('rooms', form.rooms);
       fd.append('capacity', form.capacity);
@@ -184,7 +185,6 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
   const tabs = [
     { id: 'basic', label: t('admin.apartments.tab_basic') },
-    { id: 'details', label: t('admin.apartments.tab_details') },
     { id: 'images', label: t('admin.apartments.tab_images') },
   ];
 
@@ -241,24 +241,6 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="label" htmlFor="apt-id">{t('admin.apartments.id_label')}</label>
-                    <div className="relative">
-                      <Hash
-                        size={14}
-                        className={`absolute top-1/2 -translate-y-1/2 text-dark-400 ${isRTL ? 'right-3' : 'left-3'}`}
-                      />
-                      <input
-                        id="apt-id"
-                        type="text"
-                        value={form.apartmentId}
-                        onChange={(e) => setForm({ ...form, apartmentId: e.target.value })}
-                        className={`input uppercase bg-white dark:bg-dark-900 text-dark-900 dark:text-white ${isRTL ? 'pr-8' : 'pl-8'}`}
-                        placeholder={t('admin.apartments.id_placeholder', { defaultValue: 'Enter Apartment ID (e.g. A12)' })}
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div>
                     <label className="label" htmlFor="apt-district">{t('admin.apartments.district_label')}</label>
                     <div className="relative">
                       <select
@@ -278,18 +260,25 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                     </div>
                   </div>
                   <div>
-                    <label className="label" htmlFor="apt-floor">{t('admin.apartments.floor_label')}</label>
+                    <label className="label" htmlFor="apt-price">{t('admin.apartments.price_label')}</label>
                     <input
-                      id="apt-floor"
+                      id="apt-price"
                       type="number"
-                      min={1}
-                      max={20}
-                      value={form.floor}
-                      onChange={(e) => setForm({ ...form, floor: e.target.value })}
+                      value={form.price}
+                      onChange={(e) => setForm({ ...form, price: e.target.value })}
                       className="input"
-                      placeholder={t('admin.apartments.floor_placeholder')}
+                      placeholder={t('admin.apartments.price_placeholder')}
+                      min="0"
                       required
                     />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="label" htmlFor="contact-whatsapp">{t('admin.apartments.whatsapp_label')}</label>
+                    <input id="contact-whatsapp" type="tel" value={form.contactWhatsapp} onChange={(e) => setForm({ ...form, contactWhatsapp: e.target.value })} className="input" placeholder={t('admin.apartments.whatsapp_placeholder')} />
+                    <p className="text-xs text-dark-400 mt-1">{t('admin.apartments.whatsapp_hint')}</p>
                   </div>
                 </div>
 
@@ -304,118 +293,6 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                     placeholder={t('admin.apartments.description_placeholder')}
                   />
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="label" htmlFor="apt-building">{t('admin.apartments.building_label')}</label>
-                    <input
-                      id="apt-building"
-                      type="text"
-                      value={form.buildingNo}
-                      onChange={(e) => setForm({ ...form, buildingNo: e.target.value })}
-                      className="input"
-                      placeholder={t('admin.apartments.building_placeholder')}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="label" htmlFor="apt-number">{t('admin.apartments.apt_number_label')}</label>
-                    <input
-                      id="apt-number"
-                      type="text"
-                      value={form.apartmentNo}
-                      onChange={(e) => setForm({ ...form, apartmentNo: e.target.value })}
-                      className="input"
-                      placeholder={t('admin.apartments.apt_number_placeholder')}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="label" htmlFor="apt-price">{t('admin.apartments.price_label')}</label>
-                    <input
-                      id="apt-price"
-                      type="number"
-                      value={form.price}
-                      onChange={(e) => setForm({ ...form, price: e.target.value })}
-                      className="input"
-                      placeholder={t('admin.apartments.price_placeholder')}
-                      min="0"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="label" htmlFor="apt-rooms">{t('admin.apartments.rooms_label')}</label>
-                    <input
-                      id="apt-rooms"
-                      type="number"
-                      value={form.rooms}
-                      onChange={(e) => setForm({ ...form, rooms: e.target.value })}
-                      className="input"
-                      placeholder={t('admin.apartments.rooms_placeholder')}
-                      min="1"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ── Details Tab ── */}
-            {activeTab === 'details' && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="label" htmlFor="apt-capacity">{t('admin.apartments.capacity_label')}</label>
-                    <input id="apt-capacity" type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} className="input" min="1" />
-                  </div>
-                  <div>
-                    <label className="label" htmlFor="apt-available-beds">{t('admin.apartments.available_beds_label')}</label>
-                    <input id="apt-available-beds" type="number" value={form.availableBeds} onChange={(e) => setForm({ ...form, availableBeds: e.target.value })} className="input" min="0" />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="label" htmlFor="apt-gender">{t('admin.apartments.gender_label')}</label>
-                  <div className="relative">
-                    <select
-                      id="apt-gender"
-                      value={form.gender}
-                      onChange={(e) => setForm({ ...form, gender: e.target.value })}
-                      className="input appearance-none"
-                    >
-                      <option value="mixed">{t('admin.apartments.mixed')}</option>
-                      <option value="male">{t('admin.apartments.male_only')}</option>
-                      <option value="female">{t('admin.apartments.female_only')}</option>
-                    </select>
-                    <ChevronDown
-                      size={14}
-                      className={`absolute top-1/2 -translate-y-1/2 text-dark-400 pointer-events-none ${isRTL ? 'left-3' : 'right-3'}`}
-                    />
-                  </div>
-                </div>
-
-                {/* Toggles */}
-                <div className="grid grid-cols-2 gap-3">
-                  {toggleFields.map(({ key, label }) => (
-                    <button
-                      key={key}
-                      type="button"
-                      id={`toggle-${key}`}
-                      onClick={() => setForm({ ...form, [key]: !form[key] })}
-                      className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all ${form[key]
-                          ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
-                          : 'border-dark-200 dark:border-dark-600 text-dark-500 dark:text-dark-400'
-                        }`}
-                    >
-                      <span className="text-sm font-medium">{label}</span>
-                      {form[key] ? <ToggleRight size={22} className="text-primary-500" /> : <ToggleLeft size={22} />}
-                    </button>
-                  ))}
-                </div>
-
               </div>
             )}
 
@@ -486,24 +363,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
               </div>
             )}
 
-            {/* ── Contact Tab ── */}
-            {activeTab === 'contact' && (
-              <div className="space-y-4">
-                <div>
-                  <label className="label" htmlFor="contact-phone">{t('admin.apartments.phone_label')}</label>
-                  <input id="contact-phone" type="tel" value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} className="input" placeholder={t('admin.apartments.phone_placeholder')} />
-                </div>
-                <div>
-                  <label className="label" htmlFor="contact-whatsapp">{t('admin.apartments.whatsapp_label')}</label>
-                  <input id="contact-whatsapp" type="tel" value={form.contactWhatsapp} onChange={(e) => setForm({ ...form, contactWhatsapp: e.target.value })} className="input" placeholder={t('admin.apartments.whatsapp_placeholder')} />
-                  <p className="text-xs text-dark-400 mt-1">{t('admin.apartments.whatsapp_hint')}</p>
-                </div>
-                <div>
-                  <label className="label" htmlFor="contact-email">{t('admin.apartments.email_label')}</label>
-                  <input id="contact-email" type="email" value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })} className="input" placeholder={t('admin.apartments.email_placeholder')} />
-                </div>
-              </div>
-            )}
+
           </div>
 
           {/* Footer Actions */}
