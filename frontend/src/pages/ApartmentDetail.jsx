@@ -50,7 +50,7 @@ const ApartmentDetail = () => {
       .then((res) => {
         setApartment(res.data.data);
         const apt = res.data.data;
-        document.title = `Floor ${apt.floor} - UniStay`;
+        document.title = `Apartment #${apt.apartmentId} - UniStay`;
       })
       .catch(() => setError(t('apartment.not_found_title')))
       .finally(() => setLoading(false));
@@ -125,7 +125,7 @@ const ApartmentDetail = () => {
             </>
           )}
           <span className="text-dark-900 dark:text-white font-medium truncate max-w-xs">
-            {isRTL ? `الطابق ${apartment.floor}` : `Floor ${apartment.floor}`}
+            Apartment #{apartment.apartmentId}
           </span>
         </div>
       </div>
@@ -149,7 +149,18 @@ const ApartmentDetail = () => {
           {/* Left: Images + Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Image Gallery */}
-            <ImageCarousel images={apartment.images} title={`Floor ${apartment.floor}`} />
+            <div className="relative">
+              <ImageCarousel images={apartment.images} title={`Apartment #${apartment.apartmentId}`} />
+              {/* Not Available overlay on image */}
+              {!apartment.available && (
+                <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center pointer-events-none z-10">
+                  <div className="bg-red-600 text-white font-bold text-lg px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 rotate-[-3deg]">
+                    <XCircle size={22} />
+                    Currently Not Available
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Title Block */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -177,7 +188,7 @@ const ApartmentDetail = () => {
               </div>
 
               <h1 className="font-display font-bold text-2xl md:text-3xl text-dark-900 dark:text-white mb-2">
-                {isRTL ? `الطابق ${apartment.floor}` : `Floor ${apartment.floor}`}
+                Apartment #{apartment.apartmentId}
               </h1>
 
               <div className="flex items-center gap-2 text-dark-500 dark:text-dark-400 text-sm">
@@ -308,18 +319,33 @@ const ApartmentDetail = () => {
                 </span>
               </div>
 
-              {/* WhatsApp CTA */}
+              {/* WhatsApp CTA or Not Available notice */}
               <div className="mt-5 pt-5 border-t border-dark-100 dark:border-dark-700">
-                <a
-                  href={`https://wa.me/201035396964?text=${encodeURIComponent(`Hello, I am interested in Apartment #${apartment.apartmentId}. Could you provide more details?`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  id="contact-whatsapp"
-                  className="flex items-center justify-center gap-3 w-full p-4 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50"
-                >
-                  <MessageCircle size={20} />
-                  {t('apartment.whatsapp_inquire')}
-                </a>
+                {apartment.available ? (
+                  <a
+                    href={`https://wa.me/201035396964?text=${encodeURIComponent(`Hello, I am interested in Apartment #${apartment.apartmentId}. Could you provide more details?`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    id="contact-whatsapp"
+                    className="flex items-center justify-center gap-3 w-full p-4 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50"
+                  >
+                    <MessageCircle size={20} />
+                    {t('apartment.whatsapp_inquire')}
+                  </a>
+                ) : (
+                  <div
+                    id="not-available-notice"
+                    className="flex flex-col items-center justify-center gap-2 w-full p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl"
+                  >
+                    <XCircle size={22} className="text-red-500" />
+                    <p className="font-semibold text-red-700 dark:text-red-400 text-sm text-center">
+                      This apartment is currently not available
+                    </p>
+                    <p className="text-xs text-red-500 dark:text-red-500 text-center">
+                      Check back later or browse other listings
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

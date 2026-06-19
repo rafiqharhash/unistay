@@ -57,14 +57,14 @@ const ComparisonBar = () => {
                   </div>
                   <div className="ml-2 mr-2 min-w-0 flex-1 hidden sm:block">
                     <p className="text-xs font-medium text-dark-800 dark:text-dark-200 truncate">
-                      {apt.title}
+                      #{apt.apartmentId}
                     </p>
                   </div>
                   
                   {/* Remove Button */}
                   <button
                     onClick={() => removeFromCompare(apt._id)}
-                    aria-label={t('compare.bar_remove_aria', { title: apt.title })}
+                    aria-label={t('compare.bar_remove_aria', { title: apt.apartmentId })}
                     className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-sm transition-colors"
                   >
                     <X size={12} />

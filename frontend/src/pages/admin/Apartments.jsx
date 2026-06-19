@@ -604,8 +604,8 @@ const AdminApartments = () => {
                             )}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-medium text-dark-800 dark:text-dark-100 truncate max-w-[160px]">Floor {apt.floor}</p>
-                            <p className="text-xs text-dark-400 font-mono">#{apt.apartmentId}</p>
+                            <p className="font-medium text-dark-800 dark:text-dark-100 truncate max-w-[160px]">#{apt.apartmentId}</p>
+                            <p className="text-xs text-dark-400">{apt.districtId?.name || '—'}</p>
                           </div>
                         </div>
                       </td>
@@ -616,15 +616,19 @@ const AdminApartments = () => {
                         <span className="font-semibold text-primary-500">{formatPrice(apt.price)}</span>
                       </td>
                       <td className="px-4 py-3 hidden lg:table-cell">
-                        <div className="flex gap-1.5">
+                        <div className="flex flex-col gap-1.5">
                           <button
                             onClick={() => handleToggleAvailable(apt)}
                             id={`toggle-available-${apt._id}`}
-                            title="Toggle availability"
-                            className={apt.available ? 'badge-available cursor-pointer hover:opacity-75 transition-opacity' : 'badge-unavailable cursor-pointer hover:opacity-75 transition-opacity'}
+                            title={apt.available ? 'Click to mark as Unavailable' : 'Click to mark as Available'}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-2 transition-all ${
+                              apt.available
+                                ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
+                                : 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40'
+                            }`}
                           >
-                            {apt.available ? <CheckCircle size={11} /> : <XCircle size={11} />}
-                            {apt.available ? t('admin.apartments.available') : t('admin.apartments.unavailable')}
+                            {apt.available ? <CheckCircle size={12} /> : <XCircle size={12} />}
+                            {apt.available ? 'Available' : 'Not Available'}
                           </button>
                           <button
                             onClick={() => handleToggleFeatured(apt)}
@@ -722,7 +726,7 @@ const AdminApartments = () => {
                 </h3>
                 <p className="text-dark-500 dark:text-dark-400 text-sm mb-6">
                   {t('admin.apartments.delete_confirm')}{' '}
-                  <strong>"Floor {deleteConfirm.floor} #{deleteConfirm.apartmentId}"</strong>?{' '}
+                  <strong>"#{deleteConfirm.apartmentId}"</strong>?{' '}
                   {t('admin.apartments.delete_warning')}
                 </p>
                 <div className="flex gap-3">

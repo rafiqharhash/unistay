@@ -34,7 +34,7 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
       className="card-hover group flex flex-col overflow-hidden"
     >
       {/* Image */}
-      <div className="relative overflow-hidden h-52 bg-dark-200 dark:bg-dark-700 shrink-0">
+      <div className={`relative overflow-hidden h-52 bg-dark-200 dark:bg-dark-700 shrink-0 ${!apartment.available ? 'opacity-70' : ''}`}>
         <CompareButton apartment={apartment} />
         
         {firstImage ? (
@@ -47,6 +47,16 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-dark-200 to-dark-300 dark:from-dark-700 dark:to-dark-800">
             <BedDouble size={40} className="text-dark-400 dark:text-dark-600" />
+          </div>
+        )}
+
+        {/* Not Available overlay banner */}
+        {!apartment.available && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
+            <div className="bg-red-600 text-white font-bold text-sm px-4 py-2 rounded-xl shadow-lg flex items-center gap-2 rotate-[-4deg]">
+              <XCircle size={16} />
+              Not Available
+            </div>
           </div>
         )}
 
@@ -78,12 +88,10 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
         <div>
           <div className="flex items-start justify-between gap-2 mb-1">
             <h3 className="font-display font-semibold text-base text-dark-900 dark:text-white line-clamp-1 group-hover:text-primary-500 transition-colors">
-              {isRTL
-                ? `الطابق ${apartment.floor}`
-                : `Floor ${apartment.floor}`}
+              #{apartment.apartmentId}
             </h3>
           </div>
-          <span className="text-xs text-dark-400 dark:text-dark-500 font-mono">#{apartment.apartmentId}</span>
+          <span className="text-xs text-dark-400 dark:text-dark-500">{apartment.districtId?.name || ''}</span>
         </div>
 
         {/* Location */}

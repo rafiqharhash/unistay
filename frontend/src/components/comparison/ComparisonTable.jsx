@@ -229,7 +229,7 @@ const ComparisonTable = ({ apartments, showDifferencesOnly }) => {
                     
                     <div className="aspect-video w-full rounded-xl overflow-hidden bg-dark-100 dark:bg-dark-700 mb-3 relative">
                       {apt.images?.[0] ? (
-                        <img src={apt.images[0]} alt={apt.title} className="w-full h-full object-cover" />
+                        <img src={apt.images[0]} alt={`Apartment #${apt.apartmentId}`} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <Building2 size={24} className="text-dark-300" />
@@ -237,10 +237,9 @@ const ComparisonTable = ({ apartments, showDifferencesOnly }) => {
                       )}
                     </div>
                     
-                    <h4 className="font-display font-semibold text-dark-900 dark:text-white line-clamp-2 mb-1">
-                      {apt.title}
+                    <h4 className="font-display font-semibold text-dark-900 dark:text-white line-clamp-2 mb-4">
+                      #{apt.apartmentId}
                     </h4>
-                    <p className="text-xs text-dark-400 font-mono mb-4">#{apt.apartmentId}</p>
                     
                     <Link to={`/apartments/${apt._id}`} className="btn-secondary w-full justify-center py-2 text-xs">
                       {t('compare.view_details')} <ExternalLink size={12} />
