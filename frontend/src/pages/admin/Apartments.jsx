@@ -36,10 +36,10 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
     districtId: apartment?.districtId?._id || apartment?.districtId || '',
     floor: apartment?.floor || 1,
     description: apartment?.description || '',
-    buildingNo: apartment?.buildingNo || '',
-    apartmentNo: apartment?.apartmentNo || '',
+    buildingNo: apartment?.buildingNo || 'N/A',
+    apartmentNo: apartment?.apartmentNo || 'N/A',
     price: apartment?.price || '',
-    rooms: apartment?.rooms || '',
+    rooms: apartment?.rooms || 1,
     capacity: apartment?.capacity || 1,
     gender: apartment?.gender || 'mixed',
     wifi: apartment?.wifi || false,
@@ -102,6 +102,10 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.apartmentId.trim()) {
+      toast.error('Apartment Code is required.');
+      return;
+    }
     if (!form.districtId || !form.price) {
       toast.error(t('admin.apartments.fill_required'));
       return;
@@ -109,15 +113,14 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
     setLoading(true);
     try {
       const fd = new FormData();
-      if (form.apartmentId) fd.append('apartmentId', form.apartmentId);
-      else fd.append('apartmentId', `APT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`);
+      fd.append('apartmentId', form.apartmentId.trim().toUpperCase());
       fd.append('districtId', form.districtId);
       fd.append('floor', form.floor || 1);
       fd.append('description', form.description);
-      fd.append('buildingNo', form.buildingNo || "N/A");
-      fd.append('apartmentNo', form.apartmentNo || "N/A");
+      fd.append('buildingNo', form.buildingNo || 'N/A');
+      fd.append('apartmentNo', form.apartmentNo || 'N/A');
       fd.append('price', form.price);
-      fd.append('rooms', form.rooms);
+      fd.append('rooms', form.rooms || 1);
       fd.append('capacity', form.capacity);
       fd.append('gender', form.gender);
       fd.append('wifi', form.wifi);
@@ -239,9 +242,33 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
             {/* ── Basic Info Tab ── */}
             {activeTab === 'basic' && (
               <div className="space-y-4">
+                {/* Apartment Code */}
+                <div>
+                  <label className="label" htmlFor="apt-id">
+                    Apartment Code <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Hash
+                      size={14}
+                      className={`absolute top-1/2 -translate-y-1/2 text-dark-400 ${isRTL ? 'right-3' : 'left-3'}`}
+                    />
+                    <input
+                      id="apt-id"
+                      type="text"
+                      value={form.apartmentId}
+                      onChange={(e) => setForm({ ...form, apartmentId: e.target.value })}
+                      className={`input uppercase bg-white dark:bg-dark-900 text-dark-900 dark:text-white ${isRTL ? 'pr-8' : 'pl-8'}`}
+                      placeholder="e.g. A102"
+                      required
+                    />
+                  </div>
+                  <p className="text-xs text-dark-400 mt-1">This code is unique and will be referenced in WhatsApp inquiries.</p>
+                </div>
+
+                {/* Location + Price */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="label" htmlFor="apt-district">{t('admin.apartments.district_label')}</label>
+                    <label className="label" htmlFor="apt-district">{t('admin.apartments.district_label')} <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <select
                         id="apt-district"
@@ -260,7 +287,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                     </div>
                   </div>
                   <div>
-                    <label className="label" htmlFor="apt-price">{t('admin.apartments.price_label')}</label>
+                    <label className="label" htmlFor="apt-price">{t('admin.apartments.price_label')} <span className="text-red-500">*</span></label>
                     <input
                       id="apt-price"
                       type="number"
@@ -274,23 +301,17 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4">
-                  <div>
-                    <label className="label" htmlFor="contact-whatsapp">{t('admin.apartments.whatsapp_label')}</label>
-                    <input id="contact-whatsapp" type="tel" value={form.contactWhatsapp} onChange={(e) => setForm({ ...form, contactWhatsapp: e.target.value })} className="input" placeholder={t('admin.apartments.whatsapp_placeholder')} />
-                    <p className="text-xs text-dark-400 mt-1">{t('admin.apartments.whatsapp_hint')}</p>
-                  </div>
-                </div>
-
+                {/* Description */}
                 <div>
-                  <label className="label" htmlFor="apt-description">{t('admin.apartments.description_label')}</label>
+                  <label className="label" htmlFor="apt-description">{t('admin.apartments.description_label')} <span className="text-red-500">*</span></label>
                   <textarea
                     id="apt-description"
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
                     className="input resize-none"
-                    rows={4}
+                    rows={5}
                     placeholder={t('admin.apartments.description_placeholder')}
+                    required
                   />
                 </div>
               </div>

@@ -311,7 +311,7 @@ const ApartmentDetail = () => {
               {/* WhatsApp CTA */}
               <div className="mt-5 pt-5 border-t border-dark-100 dark:border-dark-700">
                 <a
-                  href={`https://wa.me/201035396964?text=${encodeURIComponent(`Hi, I'm interested in apartment #${apartment.apartmentId}`)}`}
+                  href={`https://wa.me/201035396964?text=${encodeURIComponent(`Hello, I am interested in Apartment #${apartment.apartmentId}. Could you provide more details?`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   id="contact-whatsapp"

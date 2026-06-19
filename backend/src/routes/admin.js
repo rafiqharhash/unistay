@@ -42,13 +42,13 @@ router.post(
   '/apartments',
   upload.array('images', 50),
   [
-    body('apartmentId').optional().trim(),
+    body('apartmentId').notEmpty().withMessage('Apartment Code is required.'),
     body('districtId').notEmpty().withMessage('District is required.'),
-    body('floor').optional().isNumeric().withMessage('Floor must be a number.'),
+    body('floor').optional({ checkFalsy: true }).isNumeric().withMessage('Floor must be a number.'),
     body('price').isNumeric().withMessage('Price must be a number.'),
-    body('buildingNo').optional().trim(),
-    body('apartmentNo').optional().trim(),
-    body('rooms').optional().isNumeric().withMessage('Rooms must be a number.'),
+    body('buildingNo').optional({ checkFalsy: true }).trim(),
+    body('apartmentNo').optional({ checkFalsy: true }).trim(),
+    body('rooms').optional({ checkFalsy: true }).isNumeric().withMessage('Rooms must be a number.'),
   ],
   createApartment
 );
