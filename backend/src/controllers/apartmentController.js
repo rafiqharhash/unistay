@@ -230,6 +230,7 @@ const createApartment = async (req, res, next) => {
       available: req.body.available !== 'false' && req.body.available !== false,
       featured: req.body.featured === 'true' || req.body.featured === true,
       contactInfo,
+      rentType: req.body.rentType || 'annual',
     });
 
     const populated = await apartment.populate('districtId', 'name');
@@ -311,6 +312,9 @@ const updateApartment = async (req, res, next) => {
     if (req.body.fans !== undefined) apartment.fans = req.body.fans === 'true' || req.body.fans === true;
     if (req.body.available !== undefined) apartment.available = req.body.available === 'true' || req.body.available === true;
     if (req.body.featured !== undefined) apartment.featured = req.body.featured === 'true' || req.body.featured === true;
+    if (req.body.rentType !== undefined && ['annual', 'seasonal', 'winter'].includes(req.body.rentType)) {
+      apartment.rentType = req.body.rentType;
+    }
     apartment.contactInfo = contactInfo;
     apartment.images = [...existingImages, ...newImageUrls];
 

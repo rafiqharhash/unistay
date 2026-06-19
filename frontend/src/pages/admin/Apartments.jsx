@@ -13,15 +13,19 @@ import { apartmentAPI, districtAPI } from '../../api/axios';
 
 const isVideo = (url) => {
   if (!url) return false;
-  // Check file extensions
   if (url.match(/\.(mp4|webm|mov|mkv)(\?.*)?$/i)) return true;
-  // Cloudinary video URLs contain /video/ in the path
   if (url.includes('res.cloudinary.com') && url.includes('/video/')) return true;
   return false;
 };
 
-const formatPrice = (p) =>
-  new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(p);
+const formatPrice = (price) =>
+  new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(price);
+
+const RENT_TYPE_CONFIG = {
+  annual:   { label: 'Annual',   emoji: '\uD83D\uDDD3\uFE0F', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',   priceLabel: 'Annual' },
+  seasonal: { label: 'Seasonal', emoji: '\u2600\uFE0F',       color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300', priceLabel: 'Seasonal' },
+  winter:   { label: 'Winter',   emoji: '\u2744\uFE0F',       color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300', priceLabel: 'Monthly' },
+};
 
 
 
@@ -54,6 +58,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
     contactPhone: apartment?.contactInfo?.phone || '',
     contactWhatsapp: apartment?.contactInfo?.whatsapp || '',
     contactEmail: apartment?.contactInfo?.email || '',
+    rentType: apartment?.rentType || 'annual',
   });
 
   const [newFiles, setNewFiles] = useState([]);
@@ -120,6 +125,7 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
       fd.append('buildingNo', form.buildingNo || 'N/A');
       fd.append('apartmentNo', form.apartmentNo || 'N/A');
       fd.append('price', form.price);
+      fd.append('rentType', form.rentType || 'annual');
       fd.append('rooms', form.rooms || 1);
       fd.append('capacity', form.capacity);
       fd.append('gender', form.gender);
@@ -265,20 +271,21 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                   <p className="text-xs text-dark-400 mt-1">This code is unique and will be referenced in WhatsApp inquiries.</p>
                 </div>
 
-                {/* Location + Price */}
+                {/* Rent Type + Price */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="label" htmlFor="apt-district">{t('admin.apartments.district_label')} <span className="text-red-500">*</span></label>
+                    <label className="label" htmlFor="apt-rent-type">Rent Type <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <select
-                        id="apt-district"
-                        value={form.districtId}
-                        onChange={(e) => setForm({ ...form, districtId: e.target.value })}
+                        id="apt-rent-type"
+                        value={form.rentType}
+                        onChange={(e) => setForm({ ...form, rentType: e.target.value })}
                         className="input appearance-none"
                         required
                       >
-                        <option value="">{t('admin.apartments.select_district')}</option>
-                        {districts.map((d) => <option key={d._id} value={d._id}>{d.name}</option>)}
+                        <option value="annual">🗓️ Annual (Yearly Rent)</option>
+                        <option value="seasonal">☀️ Seasonal (Summer Season)</option>
+                        <option value="winter">❄️ Winter (Monthly Rent)</option>
                       </select>
                       <ChevronDown
                         size={14}
@@ -287,16 +294,45 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                     </div>
                   </div>
                   <div>
-                    <label className="label" htmlFor="apt-price">{t('admin.apartments.price_label')} <span className="text-red-500">*</span></label>
+                    <label className="label" htmlFor="apt-price">
+                      {form.rentType === 'annual' ? 'Annual Price' : form.rentType === 'seasonal' ? 'Seasonal Price (Full Season)' : 'Monthly Winter Price'}
+                      {' '}<span className="text-red-500">*</span>
+                    </label>
                     <input
                       id="apt-price"
                       type="number"
                       value={form.price}
                       onChange={(e) => setForm({ ...form, price: e.target.value })}
                       className="input"
-                      placeholder={t('admin.apartments.price_placeholder')}
+                      placeholder={form.rentType === 'annual' ? 'e.g. 48000' : form.rentType === 'seasonal' ? 'e.g. 25000' : 'e.g. 4000'}
                       min="0"
                       required
+                    />
+                    <p className="text-xs text-dark-400 mt-1">
+                      {form.rentType === 'annual' && 'Total yearly rental price (EGP)'}
+                      {form.rentType === 'seasonal' && 'Full summer season price — not monthly (EGP)'}
+                      {form.rentType === 'winter' && 'Price per month for winter season (EGP)'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Location */}
+                <div>
+                  <label className="label" htmlFor="apt-district">{t('admin.apartments.district_label')} <span className="text-red-500">*</span></label>
+                  <div className="relative">
+                    <select
+                      id="apt-district"
+                      value={form.districtId}
+                      onChange={(e) => setForm({ ...form, districtId: e.target.value })}
+                      className="input appearance-none"
+                      required
+                    >
+                      <option value="">{t('admin.apartments.select_district')}</option>
+                      {districts.map((d) => <option key={d._id} value={d._id}>{d.name}</option>)}
+                    </select>
+                    <ChevronDown
+                      size={14}
+                      className={`absolute top-1/2 -translate-y-1/2 text-dark-400 pointer-events-none ${isRTL ? 'left-3' : 'right-3'}`}
                     />
                   </div>
                 </div>
@@ -613,7 +649,17 @@ const AdminApartments = () => {
                         <span className="text-dark-600 dark:text-dark-300">{apt.districtId?.name || '—'}</span>
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
-                        <span className="font-semibold text-primary-500">{formatPrice(apt.price)}</span>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-semibold text-primary-500">{formatPrice(apt.price)}</span>
+                          {(() => {
+                            const rt = RENT_TYPE_CONFIG[apt.rentType || 'annual'];
+                            return (
+                              <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium self-start ${rt.color}`}>
+                                {rt.emoji} {rt.label}
+                              </span>
+                            );
+                          })()}
+                        </div>
                       </td>
                       <td className="px-4 py-3 hidden lg:table-cell">
                         <div className="flex flex-col gap-1.5">

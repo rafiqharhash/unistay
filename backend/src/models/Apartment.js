@@ -100,6 +100,11 @@ const apartmentSchema = new mongoose.Schema(
       email: { type: String, default: '' },
       whatsapp: { type: String, default: '' },
     },
+    rentType: {
+      type: String,
+      enum: ['annual', 'seasonal', 'winter'],
+      default: 'annual',
+    },
   },
   { timestamps: true }
 );

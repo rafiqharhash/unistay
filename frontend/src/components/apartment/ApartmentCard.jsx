@@ -11,6 +11,12 @@ import CompareButton from '../comparison/CompareButton';
 const formatPrice = (price) =>
   new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(price);
 
+const RENT_TYPE_CONFIG = {
+  annual:   { label: 'Annual',   emoji: '\uD83D\uDDD3\uFE0F', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',   suffix: '/yr' },
+  seasonal: { label: 'Seasonal', emoji: '\u2600\uFE0F',       color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300', suffix: '/season' },
+  winter:   { label: 'Winter',   emoji: '\u2744\uFE0F',       color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300', suffix: '/mo' },
+};
+
 const ApartmentCard = ({ apartment, index = 0 }) => {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
@@ -78,7 +84,10 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
 
         {/* Price badge */}
         <div className="absolute top-3 end-3 bg-primary-500 text-white rounded-xl px-3 py-1.5 font-bold text-sm shadow-glow-orange">
-          {formatPrice(apartment.price)}<span className="font-normal text-xs">{isRTL ? '/شهر' : '/mo'}</span>
+          {formatPrice(apartment.price)}
+          <span className="font-normal text-xs">
+            {RENT_TYPE_CONFIG[apartment.rentType || 'annual']?.suffix || '/yr'}
+          </span>
         </div>
       </div>
 
@@ -114,6 +123,14 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
             {apartment.available ? <CheckCircle size={11} /> : <XCircle size={11} />}
             {apartment.available ? t('apartment.available') : t('apartment.unavailable')}
           </span>
+          {(() => {
+            const rt = RENT_TYPE_CONFIG[apartment.rentType || 'annual'];
+            return (
+              <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${rt.color}`}>
+                {rt.emoji} {rt.label}
+              </span>
+            );
+          })()}
           {genderLabel && <span className={genderClass}>{genderLabel}</span>}
         </div>
 

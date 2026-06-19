@@ -49,6 +49,7 @@ router.post(
     body('buildingNo').optional({ checkFalsy: true }).trim(),
     body('apartmentNo').optional({ checkFalsy: true }).trim(),
     body('rooms').optional({ checkFalsy: true }).isNumeric().withMessage('Rooms must be a number.'),
+    body('rentType').optional({ checkFalsy: true }).isIn(['annual', 'seasonal', 'winter']).withMessage('Invalid rent type.'),
   ],
   createApartment
 );

@@ -22,6 +22,12 @@ const formatDate = (dateStr, lang) =>
 const formatPrice = (price) =>
   new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(price);
 
+const RENT_TYPE_CONFIG = {
+  annual:   { label: 'Annual',   fullLabel: 'Annual Price',              emoji: '\uD83D\uDDD3\uFE0F', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',   priceNote: 'per year' },
+  seasonal: { label: 'Seasonal', fullLabel: 'Seasonal Price',            emoji: '\u2600\uFE0F',       color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300', priceNote: 'full season' },
+  winter:   { label: 'Winter',   fullLabel: 'Monthly Winter Price',      emoji: '\u2744\uFE0F',       color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300', priceNote: 'per month' },
+};
+
 const InfoChip = ({ icon: Icon, label, value, color = 'text-primary-500' }) => (
   <div className="flex items-center gap-3 p-3 bg-dark-50 dark:bg-dark-700/50 rounded-xl">
     <div className={`${color} shrink-0`}>
@@ -170,6 +176,15 @@ const ApartmentDetail = () => {
                     {apartment.available ? <CheckCircle size={11} /> : <XCircle size={11} />}
                     {apartment.available ? t('apartment.available') : t('apartment.unavailable')}
                   </span>
+                  {/* Rent Type badge */}
+                  {(() => {
+                    const rt = RENT_TYPE_CONFIG[apartment.rentType || 'annual'];
+                    return (
+                      <span className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${rt.color}`}>
+                        {rt.emoji} {rt.label} Rent
+                      </span>
+                    );
+                  })()}
                   {apartment.featured && (
                     <span className="badge-featured">
                       <Star size={11} fill="currentColor" /> {t('apartment.featured_label')}
@@ -291,12 +306,14 @@ const ApartmentDetail = () => {
             <div className="card p-6 sticky top-20">
               <div className="text-center mb-5">
                 <p className="text-xs text-dark-400 uppercase tracking-wider mb-1">
-                  {t('apartment.monthly_rent')}
+                  {RENT_TYPE_CONFIG[apartment.rentType || 'annual']?.fullLabel}
                 </p>
                 <p className="font-display font-bold text-4xl text-primary-500">
                   {formatPrice(apartment.price)}
                 </p>
-                <p className="text-dark-400 text-sm">{t('apartment.per_month')}</p>
+                <p className="text-dark-400 text-sm">
+                  {RENT_TYPE_CONFIG[apartment.rentType || 'annual']?.priceNote}
+                </p>
               </div>
 
               {/* District */}
@@ -323,7 +340,9 @@ const ApartmentDetail = () => {
               <div className="mt-5 pt-5 border-t border-dark-100 dark:border-dark-700">
                 {apartment.available ? (
                   <a
-                    href={`https://wa.me/201035396964?text=${encodeURIComponent(`Hello, I am interested in Apartment #${apartment.apartmentId}. Could you provide more details?`)}`}
+                    href={`https://wa.me/201035396964?text=${encodeURIComponent(
+                      `Hello, I am interested in Apartment #${apartment.apartmentId}.\nRent Type: ${RENT_TYPE_CONFIG[apartment.rentType || 'annual']?.label}\n${RENT_TYPE_CONFIG[apartment.rentType || 'annual']?.fullLabel}: ${formatPrice(apartment.price)}\nCould you provide more details?`
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     id="contact-whatsapp"
