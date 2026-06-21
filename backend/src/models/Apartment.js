@@ -58,30 +58,12 @@ const apartmentSchema = new mongoose.Schema(
       enum: ['male', 'female', 'mixed'],
       default: 'mixed',
     },
-    desks: {
-      type: Boolean,
-      default: false,
+    propertyType: {
+      type: String,
+      enum: ['apartment', 'studio', 'chalet'],
+      default: 'apartment',
     },
-    wifi: {
-      type: Boolean,
-      default: false,
-    },
-    elevator: {
-      type: Boolean,
-      default: false,
-    },
-    garden: {
-      type: Boolean,
-      default: false,
-    },
-    airConditioning: {
-      type: Boolean,
-      default: false,
-    },
-    fans: {
-      type: Boolean,
-      default: false,
-    },
+
     availableBeds: {
       type: Number,
       default: 0,
@@ -99,11 +81,6 @@ const apartmentSchema = new mongoose.Schema(
       phone: { type: String, default: '' },
       email: { type: String, default: '' },
       whatsapp: { type: String, default: '' },
-    },
-    rentType: {
-      type: String,
-      enum: ['annual', 'seasonal', 'winter'],
-      default: 'annual',
     },
   },
   { timestamps: true }

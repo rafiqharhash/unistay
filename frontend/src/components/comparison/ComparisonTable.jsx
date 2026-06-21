@@ -2,11 +2,12 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Building2, CheckCircle2, XCircle, MapPin, BedDouble, Users, 
-  Wind, Phone, Mail, ExternalLink, Calendar, Plus, X, Wifi
+  Phone, Mail, ExternalLink, Calendar, Plus, X
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../context/LanguageContext';
 import { useComparison } from '../../context/ComparisonContext';
+import { getThumbnail } from '../../utils/media';
 
 const formatPrice = (price) =>
   new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(price);
@@ -123,48 +124,6 @@ const ComparisonTable = ({ apartments, showDifferencesOnly }) => {
       )
     },
     {
-      id: 'wifi',
-      label: t('compare.field_wifi'),
-      icon: Wifi,
-      extractor: apt => apt.wifi,
-      render: (apt) => <CellBoolean value={apt.wifi} t={t} />
-    },
-    {
-      id: 'desks',
-      label: t('compare.field_desks'),
-      icon: null,
-      extractor: apt => apt.desks,
-      render: (apt) => <CellBoolean value={apt.desks} t={t} />
-    },
-    {
-      id: 'elevator',
-      label: t('compare.field_elevator'),
-      icon: null,
-      extractor: apt => apt.elevator,
-      render: (apt) => <CellBoolean value={apt.elevator} t={t} />
-    },
-    {
-      id: 'garden',
-      label: t('compare.field_garden'),
-      icon: null,
-      extractor: apt => apt.garden,
-      render: (apt) => <CellBoolean value={apt.garden} t={t} />
-    },
-    {
-      id: 'fans',
-      label: t('compare.field_fans'),
-      icon: null,
-      extractor: apt => apt.fans,
-      render: (apt) => <CellBoolean value={apt.fans} t={t} />
-    },
-    {
-      id: 'ac',
-      label: t('compare.field_ac'),
-      icon: Wind,
-      extractor: apt => apt.airConditioning,
-      render: (apt) => <CellBoolean value={apt.airConditioning} t={t} />
-    },
-    {
       id: 'featured',
       label: t('compare.field_featured'),
       icon: null,
@@ -228,8 +187,8 @@ const ComparisonTable = ({ apartments, showDifferencesOnly }) => {
                     </button>
                     
                     <div className="aspect-video w-full rounded-xl overflow-hidden bg-dark-100 dark:bg-dark-700 mb-3 relative">
-                      {apt.images?.[0] ? (
-                        <img src={apt.images[0]} alt={`Apartment #${apt.apartmentId}`} className="w-full h-full object-cover" />
+                      {getThumbnail(apt.images) ? (
+                        <img src={getThumbnail(apt.images)} alt={t('apartment.code_display', { code: apt.apartmentId })} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <Building2 size={24} className="text-dark-300" />
@@ -238,7 +197,7 @@ const ComparisonTable = ({ apartments, showDifferencesOnly }) => {
                     </div>
                     
                     <h4 className="font-display font-semibold text-dark-900 dark:text-white line-clamp-2 mb-4">
-                      #{apt.apartmentId}
+                      {t('apartment.code_display', { code: apt.apartmentId })}
                     </h4>
                     
                     <Link to={`/apartments/${apt._id}`} className="btn-secondary w-full justify-center py-2 text-xs">

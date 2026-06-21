@@ -111,6 +111,7 @@ const createDistrict = async (req, res, next) => {
     }
 
     const { name, nameAr, description, descriptionAr, googleMapsUrl } = req.body;
+    const isVacation = req.body.isVacation === 'true' || req.body.isVacation === true;
     let coverImage = '';
 
     if (req.file) {
@@ -118,7 +119,7 @@ const createDistrict = async (req, res, next) => {
       coverImage = result.secure_url;
     }
 
-    const district = await District.create({ name, nameAr, description, descriptionAr, coverImage, googleMapsUrl });
+    const district = await District.create({ name, nameAr, description, descriptionAr, coverImage, googleMapsUrl, isVacation });
 
     res.status(201).json({
       success: true,
@@ -146,6 +147,7 @@ const updateDistrict = async (req, res, next) => {
     if (description !== undefined) district.description = description;
     if (descriptionAr !== undefined) district.descriptionAr = descriptionAr;
     if (googleMapsUrl !== undefined) district.googleMapsUrl = googleMapsUrl;
+    if (req.body.isVacation !== undefined) district.isVacation = req.body.isVacation === 'true' || req.body.isVacation === true;
 
     if (req.file) {
       // Delete old image

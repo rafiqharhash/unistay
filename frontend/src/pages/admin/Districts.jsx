@@ -19,6 +19,7 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
     description: district?.description || '',
     descriptionAr: district?.descriptionAr || '',
     googleMapsUrl: district?.googleMapsUrl || '',
+    isVacation: district?.isVacation || false,
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(district?.coverImage || '');
@@ -44,6 +45,7 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
       fd.append('description', form.description.trim());
       fd.append('descriptionAr', form.descriptionAr.trim());
       fd.append('googleMapsUrl', form.googleMapsUrl.trim());
+      fd.append('isVacation', form.isVacation);
       if (imageFile) fd.append('coverImage', imageFile);
 
       if (district) {
@@ -134,6 +136,23 @@ const DistrictModal = ({ district, onClose, onSaved }) => {
                 placeholder="وصف الحي بالعربية..."
                 dir="rtl"
               />
+            </div>
+          </div>
+
+          {/* Is Vacation District */}
+          <div className="flex items-center gap-3 p-4 bg-primary-50 dark:bg-primary-900/10 rounded-xl border border-primary-100 dark:border-primary-900/30">
+            <div className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+                 style={{ backgroundColor: form.isVacation ? 'var(--color-primary-500)' : '#cbd5e1' }}
+                 onClick={() => setForm({ ...form, isVacation: !form.isVacation })}>
+              <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${form.isVacation ? 'translate-x-5' : 'translate-x-0'}`} />
+            </div>
+            <div>
+              <p className="font-semibold text-dark-900 dark:text-white text-sm">
+                Vacation District (Chalet / Studio only)
+              </p>
+              <p className="text-xs text-dark-500 dark:text-dark-400">
+                If enabled, properties added to this district will be restricted to Chalets and Studios instead of regular apartments.
+              </p>
             </div>
           </div>
 

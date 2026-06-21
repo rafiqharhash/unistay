@@ -20,6 +20,7 @@ const FilterBar = ({ onFilterChange, initialFilters = {} }) => {
     sort: initialFilters.sort || 'newest',
     gender: initialFilters.gender || '',
     available: initialFilters.available || '',
+    propertyType: initialFilters.propertyType || '',
   });
 
   useEffect(() => {
@@ -33,7 +34,7 @@ const FilterBar = ({ onFilterChange, initialFilters = {} }) => {
   };
 
   const clearFilters = () => {
-    const reset = { search: '', districtId: '', minPrice: '', maxPrice: '', sort: 'newest', gender: '', available: '' };
+    const reset = { search: '', districtId: '', minPrice: '', maxPrice: '', sort: 'newest', gender: '', available: '', propertyType: '' };
     setFilters(reset);
     onFilterChange(reset);
   };

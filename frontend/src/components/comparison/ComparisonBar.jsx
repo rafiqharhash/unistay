@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Scale, Building2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useComparison } from '../../context/ComparisonContext';
+import { getThumbnail } from '../../utils/media';
 
 const ComparisonBar = () => {
   const { t } = useTranslation();
@@ -47,8 +48,8 @@ const ComparisonBar = () => {
                   className="relative flex-shrink-0 w-24 sm:w-32 h-12 bg-dark-50 dark:bg-dark-900 rounded-lg border border-dark-100 dark:border-dark-700 flex items-center p-1 group"
                 >
                   <div className="w-10 h-10 rounded-md bg-dark-200 dark:bg-dark-800 overflow-hidden flex-shrink-0">
-                    {apt.images?.[0] ? (
-                      <img src={apt.images[0]} alt={apt.title} className="w-full h-full object-cover" />
+                    {getThumbnail(apt.images) ? (
+                      <img src={getThumbnail(apt.images)} alt={apt.title} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Building2 size={14} className="text-dark-400" />
@@ -57,14 +58,14 @@ const ComparisonBar = () => {
                   </div>
                   <div className="ml-2 mr-2 min-w-0 flex-1 hidden sm:block">
                     <p className="text-xs font-medium text-dark-800 dark:text-dark-200 truncate">
-                      #{apt.apartmentId}
+                      {t('apartment.code_display', { code: apt.apartmentId })}
                     </p>
                   </div>
                   
                   {/* Remove Button */}
                   <button
                     onClick={() => removeFromCompare(apt._id)}
-                    aria-label={t('compare.bar_remove_aria', { title: apt.apartmentId })}
+                    aria-label={t('compare.bar_remove_aria', { title: t('apartment.code_display', { code: apt.apartmentId }) })}
                     className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-sm transition-colors"
                   >
                     <X size={12} />

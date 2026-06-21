@@ -1,26 +1,21 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  MapPin, BedDouble, Users, Wind, Star,
+  Star,
   CheckCircle, XCircle, ChevronRight, ChevronLeft,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../context/LanguageContext';
 import CompareButton from '../comparison/CompareButton';
+import { getThumbnail } from '../../utils/media';
 
 const formatPrice = (price) =>
   new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(price);
 
-const RENT_TYPE_CONFIG = {
-  annual:   { label: 'Annual',   emoji: '\uD83D\uDDD3\uFE0F', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',   suffix: '/yr' },
-  seasonal: { label: 'Seasonal', emoji: '\u2600\uFE0F',       color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300', suffix: '/season' },
-  winter:   { label: 'Winter',   emoji: '\u2744\uFE0F',       color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300', suffix: '/mo' },
-};
-
 const ApartmentCard = ({ apartment, index = 0 }) => {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
-  const firstImage = apartment.images?.[0];
+  const firstImage = getThumbnail(apartment.images);
 
   const genderLabel = apartment.gender === 'male'
     ? t('apartment.male_only')
@@ -52,7 +47,7 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-dark-200 to-dark-300 dark:from-dark-700 dark:to-dark-800">
-            <BedDouble size={40} className="text-dark-400 dark:text-dark-600" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-dark-400 dark:text-dark-600"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
           </div>
         )}
 
@@ -82,12 +77,8 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
           </div>
         )}
 
-        {/* Price badge */}
         <div className="absolute top-3 end-3 bg-primary-500 text-white rounded-xl px-3 py-1.5 font-bold text-sm shadow-glow-orange">
           {formatPrice(apartment.price)}
-          <span className="font-normal text-xs">
-            {RENT_TYPE_CONFIG[apartment.rentType || 'annual']?.suffix || '/yr'}
-          </span>
         </div>
       </div>
 
@@ -97,24 +88,10 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
         <div>
           <div className="flex items-start justify-between gap-2 mb-1">
             <h3 className="font-display font-semibold text-base text-dark-900 dark:text-white line-clamp-1 group-hover:text-primary-500 transition-colors">
-              #{apartment.apartmentId}
+              {t('apartment.code_display', { code: apartment.apartmentId })}
             </h3>
           </div>
           <span className="text-xs text-dark-400 dark:text-dark-500">{apartment.districtId?.name || ''}</span>
-        </div>
-
-        {/* Location */}
-        <div className="flex items-center gap-1.5 text-sm text-dark-500 dark:text-dark-400">
-          <MapPin size={13} className="text-primary-500 shrink-0" />
-          <span className="line-clamp-1">
-            {apartment.buildingNo && apartment.apartmentNo
-              ? t('apartment.building_apt', {
-                  building: apartment.buildingNo,
-                  apt: apartment.apartmentNo,
-                })
-              : apartment.buildingNo || apartment.apartmentNo || ''}
-            {apartment.districtId?.name ? `, ${isRTL && apartment.districtId.nameAr ? apartment.districtId.nameAr : apartment.districtId.name}` : ''}
-          </span>
         </div>
 
         {/* Badges */}
@@ -123,28 +100,13 @@ const ApartmentCard = ({ apartment, index = 0 }) => {
             {apartment.available ? <CheckCircle size={11} /> : <XCircle size={11} />}
             {apartment.available ? t('apartment.available') : t('apartment.unavailable')}
           </span>
-          {(() => {
-            const rt = RENT_TYPE_CONFIG[apartment.rentType || 'annual'];
-            return (
-              <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${rt.color}`}>
-                {rt.emoji} {rt.label}
-              </span>
-            );
-          })()}
+          {apartment.propertyType && apartment.propertyType !== 'apartment' && (
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300">
+              {apartment.propertyType === 'studio' && `🛋️ ${t('apartment.type_studio')}`}
+              {apartment.propertyType === 'chalet' && `🏖️ ${t('apartment.type_chalet')}`}
+            </span>
+          )}
           {genderLabel && <span className={genderClass}>{genderLabel}</span>}
-        </div>
-
-        {/* Stats Row */}
-        <div className="flex items-center gap-4 text-sm text-dark-500 dark:text-dark-400">
-          <span className="flex items-center gap-1.5">
-            <BedDouble size={14} className="text-dark-400" />
-            {t('apartment.room_one', { count: apartment.rooms })}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Users size={14} className="text-dark-400" />
-            {t('apartment.student_one', { count: apartment.capacity })}
-          </span>
-          {apartment.airConditioning && <Wind size={14} className="text-blue-500" />}
         </div>
 
         {/* Spacer */}

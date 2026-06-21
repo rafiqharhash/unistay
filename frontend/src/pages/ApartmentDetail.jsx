@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  ArrowLeft, ArrowRight, MapPin, BedDouble, Users, Wind,
-  MessageCircle, CheckCircle, XCircle, Star, Hash, Calendar,
-  Share2,
+  ArrowLeft, ArrowRight, MapPin, BedDouble,
+  MessageCircle, CheckCircle, XCircle, Star, Calendar,
+  Share2, AlertCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -22,11 +22,7 @@ const formatDate = (dateStr, lang) =>
 const formatPrice = (price) =>
   new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(price);
 
-const RENT_TYPE_CONFIG = {
-  annual:   { label: 'Annual',   fullLabel: 'Annual Price',              emoji: '\uD83D\uDDD3\uFE0F', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',   priceNote: 'per year' },
-  seasonal: { label: 'Seasonal', fullLabel: 'Seasonal Price',            emoji: '\u2600\uFE0F',       color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300', priceNote: 'full season' },
-  winter:   { label: 'Winter',   fullLabel: 'Monthly Winter Price',      emoji: '\u2744\uFE0F',       color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300', priceNote: 'per month' },
-};
+
 
 const InfoChip = ({ icon: Icon, label, value, color = 'text-primary-500' }) => (
   <div className="flex items-center gap-3 p-3 bg-dark-50 dark:bg-dark-700/50 rounded-xl">
@@ -56,7 +52,7 @@ const ApartmentDetail = () => {
       .then((res) => {
         setApartment(res.data.data);
         const apt = res.data.data;
-        document.title = `Apartment #${apt.apartmentId} - UniStay`;
+        document.title = `${t('apartment.code_display', { code: apt.apartmentId })} - UniStay`;
       })
       .catch(() => setError(t('apartment.not_found_title')))
       .finally(() => setLoading(false));
@@ -131,7 +127,7 @@ const ApartmentDetail = () => {
             </>
           )}
           <span className="text-dark-900 dark:text-white font-medium truncate max-w-xs">
-            Apartment #{apartment.apartmentId}
+            {t('apartment.code_display', { code: apartment.apartmentId })}
           </span>
         </div>
       </div>
@@ -156,7 +152,7 @@ const ApartmentDetail = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Image Gallery */}
             <div className="relative">
-              <ImageCarousel images={apartment.images} title={`Apartment #${apartment.apartmentId}`} />
+              <ImageCarousel images={apartment.images} title={t('apartment.code_display', { code: apartment.apartmentId })} />
               {/* Not Available overlay on image */}
               {!apartment.available && (
                 <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center pointer-events-none z-10">
@@ -176,18 +172,16 @@ const ApartmentDetail = () => {
                     {apartment.available ? <CheckCircle size={11} /> : <XCircle size={11} />}
                     {apartment.available ? t('apartment.available') : t('apartment.unavailable')}
                   </span>
-                  {/* Rent Type badge */}
-                  {(() => {
-                    const rt = RENT_TYPE_CONFIG[apartment.rentType || 'annual'];
-                    return (
-                      <span className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${rt.color}`}>
-                        {rt.emoji} {rt.label} Rent
-                      </span>
-                    );
-                  })()}
+
                   {apartment.featured && (
                     <span className="badge-featured">
                       <Star size={11} fill="currentColor" /> {t('apartment.featured_label')}
+                    </span>
+                  )}
+                  {apartment.propertyType && apartment.propertyType !== 'apartment' && (
+                    <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300">
+                      {apartment.propertyType === 'studio' && `🛋️ ${t('apartment.type_studio')}`}
+                      {apartment.propertyType === 'chalet' && `🏖️ ${t('apartment.type_chalet')}`}
                     </span>
                   )}
                   {genderLabel && (
@@ -196,49 +190,13 @@ const ApartmentDetail = () => {
                     </span>
                   )}
                 </div>
-                <span className="font-mono text-xs text-dark-400 flex items-center gap-1">
-                  <Hash size={12} />
-                  {apartment.apartmentId}
-                </span>
               </div>
 
               <h1 className="font-display font-bold text-2xl md:text-3xl text-dark-900 dark:text-white mb-2">
-                Apartment #{apartment.apartmentId}
+                {apartment.apartmentId}
               </h1>
 
-              <div className="flex items-center gap-2 text-dark-500 dark:text-dark-400 text-sm">
-                <MapPin size={14} className="text-primary-500 shrink-0" />
-                <span>
-                  {apartment.buildingNo && apartment.apartmentNo
-                    ? t('apartment.building_apt', {
-                        building: apartment.buildingNo,
-                        apt: apartment.apartmentNo,
-                      })
-                    : apartment.buildingNo || apartment.apartmentNo || ''}
-                  {apartment.districtId ? `, ${isRTL && apartment.districtId.nameAr ? apartment.districtId.nameAr : apartment.districtId.name}` : ''}
-                </span>
-              </div>
             </motion.div>
-
-            {/* Info Chips */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <InfoChip
-                icon={BedDouble}
-                label={t('apartment.rooms_label')}
-                value={t('apartment.room_one', { count: apartment.rooms })}
-              />
-              <InfoChip
-                icon={Users}
-                label={t('apartment.capacity_label')}
-                value={t('apartment.student_one', { count: apartment.capacity })}
-              />
-              <InfoChip
-                icon={Wind}
-                label={t('apartment.ac_label')}
-                value={apartment.airConditioning ? t('apartment.feature_included') : t('apartment.feature_not_included')}
-                color={apartment.airConditioning ? 'text-blue-500' : 'text-dark-400'}
-              />
-            </div>
 
             {/* Available Beds */}
             {apartment.availableBeds > 0 && (
@@ -264,34 +222,6 @@ const ApartmentDetail = () => {
               </div>
             )}
 
-            {/* Amenities */}
-            <div>
-              <h2 className="font-display font-semibold text-lg text-dark-900 dark:text-white mb-3">
-                {t('apartment.amenities_title')}
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { key: 'wifi', label: t('apartment.wifi_label'), value: apartment.wifi },
-                  { key: 'desks', label: t('apartment.desks_label'), value: apartment.desks },
-                  { key: 'elevator', label: t('apartment.elevator_label'), value: apartment.elevator },
-                  { key: 'garden', label: t('apartment.garden_label'), value: apartment.garden },
-                  { key: 'ac', label: t('apartment.ac_label'), value: apartment.airConditioning },
-                  { key: 'fans', label: t('apartment.fans_label'), value: apartment.fans },
-                ].map((item) => (
-                  <span
-                    key={item.key}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium ${
-                      item.value
-                        ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
-                        : 'bg-dark-50 dark:bg-dark-800 text-dark-400'
-                    }`}
-                  >
-                    {item.value ? <CheckCircle size={13} /> : <XCircle size={13} />}
-                    {item.label}
-                  </span>
-                ))}
-              </div>
-            </div>
 
             {/* Meta */}
             <div className="flex items-center gap-2 text-xs text-dark-400 dark:text-dark-500">
@@ -306,13 +236,13 @@ const ApartmentDetail = () => {
             <div className="card p-6 sticky top-20">
               <div className="text-center mb-5">
                 <p className="text-xs text-dark-400 uppercase tracking-wider mb-1">
-                  {RENT_TYPE_CONFIG[apartment.rentType || 'annual']?.fullLabel}
+                  {t('apartment.monthly_rent')}
                 </p>
                 <p className="font-display font-bold text-4xl text-primary-500">
                   {formatPrice(apartment.price)}
                 </p>
                 <p className="text-dark-400 text-sm">
-                  {RENT_TYPE_CONFIG[apartment.rentType || 'annual']?.priceNote}
+                  {t('apartment.per_month')}
                 </p>
               </div>
 
@@ -341,7 +271,7 @@ const ApartmentDetail = () => {
                 {apartment.available ? (
                   <a
                     href={`https://wa.me/201035396964?text=${encodeURIComponent(
-                      `Hello, I am interested in Apartment #${apartment.apartmentId}.\nRent Type: ${RENT_TYPE_CONFIG[apartment.rentType || 'annual']?.label}\n${RENT_TYPE_CONFIG[apartment.rentType || 'annual']?.fullLabel}: ${formatPrice(apartment.price)}\nCould you provide more details?`
+                      `Hello, I am interested in ${t('apartment.code_display', { code: apartment.apartmentId })}.\n${t('apartment.monthly_rent')}: ${formatPrice(apartment.price)}\nCould you provide more details?`
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"

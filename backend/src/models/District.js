@@ -32,6 +32,10 @@ const districtSchema = new mongoose.Schema(
       default: '',
       trim: true,
     },
+    isVacation: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

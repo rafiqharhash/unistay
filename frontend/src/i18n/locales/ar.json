@@ -50,11 +50,12 @@
   "district_page": {
     "back_home": "العودة للرئيسية",
     "district_label": "الحي",
-    "total_apartments_one": "{{count}} شقة إجمالاً",
-    "total_apartments_other": "{{count}} شقة إجمالاً",
+    "total_apartments_one": "شقة واحدة",
+    "total_apartments_other": "{{count}} شقق",
     "available": "متاح",
-    "no_apartments_title": "لا توجد شقق",
-    "no_apartments_subtitle": "جرب تعديل الفلاتر.",
+    "no_apartments_title": "لم يتم العثور على عقارات",
+    "no_apartments_subtitle": "حاول تغيير الفلاتر للعثور على ما تبحث عنه.",
+    "choose_type": "عن ماذا تبحث؟",
     "not_found_title": "الحي غير موجود",
     "go_home": "الصفحة الرئيسية",
     "results_one": "تم العثور على {{count}} شقة",
@@ -113,7 +114,10 @@
     "link_copied": "تم نسخ الرابط!",
     "building_apt": "عمارة {{building}}، كود {{apt}}",
     "featured_label": "مميز",
-    "whatsapp_inquire": "استفسر عبر واتساب"
+    "whatsapp_inquire": "استفسر عبر واتساب",
+    "code_display": "كود {{code}}",
+    "type_chalet": "شاليه",
+    "type_studio": "ستوديو"
   },
   "filter": {
     "search_placeholder": "ابحث برقم الشقة...",
@@ -122,6 +126,8 @@
     "price_desc": "السعر: من الأعلى للأقل",
     "filters_btn": "فلاتر",
     "clear": "مسح",
+    "property_type_label": "نوع العقار",
+    "all_types": "الكل",
     "district_label": "الحي",
     "all_districts": "جميع الأحياء",
     "min_price": "أدنى سعر (جنيه)",
@@ -310,7 +316,10 @@
       "marked_unavailable": "تم وضع علامة غير متاح.",
       "update_failed": "فشل التحديث.",
       "some_skipped": "تم تخطي بعض الملفات (ليست صوراً أو فيديوهات).",
-      "new_badge": "جديد"
+      "new_badge": "جديد",
+      "property_type_label": "نوع العقار *",
+      "property_type_chalet": "🏖️ شاليه (Chalet)",
+      "property_type_studio": "🛋️ ستوديو (Studio)"
     }
   },
   "common": {

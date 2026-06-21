@@ -10,23 +10,10 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../context/LanguageContext';
 import { apartmentAPI, districtAPI } from '../../api/axios';
-
-const isVideo = (url) => {
-  if (!url) return false;
-  if (url.match(/\.(mp4|webm|mov|mkv)(\?.*)?$/i)) return true;
-  if (url.includes('res.cloudinary.com') && url.includes('/video/')) return true;
-  return false;
-};
+import { isVideo, getThumbnail } from '../../utils/media';
 
 const formatPrice = (price) =>
   new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(price);
-
-const RENT_TYPE_CONFIG = {
-  annual:   { label: 'Annual',   emoji: '\uD83D\uDDD3\uFE0F', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',   priceLabel: 'Annual' },
-  seasonal: { label: 'Seasonal', emoji: '\u2600\uFE0F',       color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300', priceLabel: 'Seasonal' },
-  winter:   { label: 'Winter',   emoji: '\u2744\uFE0F',       color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300', priceLabel: 'Monthly' },
-};
-
 
 
 // ─── Apartment Modal ──────────────────────────────────────────────────────────
@@ -46,19 +33,14 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
     rooms: apartment?.rooms || 1,
     capacity: apartment?.capacity || 1,
     gender: apartment?.gender || 'mixed',
-    wifi: apartment?.wifi || false,
-    desks: apartment?.desks || false,
-    elevator: apartment?.elevator || false,
-    garden: apartment?.garden || false,
-    airConditioning: apartment?.airConditioning || false,
-    fans: apartment?.fans || false,
+    propertyType: apartment?.propertyType || 'apartment',
+
     availableBeds: apartment?.availableBeds || 0,
     available: apartment?.available ?? true,
     featured: apartment?.featured || false,
     contactPhone: apartment?.contactInfo?.phone || '',
     contactWhatsapp: apartment?.contactInfo?.whatsapp || '',
     contactEmail: apartment?.contactInfo?.email || '',
-    rentType: apartment?.rentType || 'annual',
   });
 
   const [newFiles, setNewFiles] = useState([]);
@@ -68,6 +50,9 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
   const [amenityInput, setAmenityInput] = useState('');
   const [activeTab, setActiveTab] = useState('basic');
   const fileRef = useRef();
+
+  const selectedDistrict = districts.find(d => d._id === form.districtId);
+  const isVacation = selectedDistrict?.isVacation || false;
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -125,16 +110,11 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
       fd.append('buildingNo', form.buildingNo || 'N/A');
       fd.append('apartmentNo', form.apartmentNo || 'N/A');
       fd.append('price', form.price);
-      fd.append('rentType', form.rentType || 'annual');
       fd.append('rooms', form.rooms || 1);
       fd.append('capacity', form.capacity);
       fd.append('gender', form.gender);
-      fd.append('wifi', form.wifi);
-      fd.append('desks', form.desks);
-      fd.append('elevator', form.elevator);
-      fd.append('garden', form.garden);
-      fd.append('airConditioning', form.airConditioning);
-      fd.append('fans', form.fans);
+      fd.append('propertyType', isVacation ? (form.propertyType === 'apartment' ? 'chalet' : form.propertyType) : 'apartment');
+
       fd.append('availableBeds', form.availableBeds);
       fd.append('available', form.available);
       fd.append('featured', form.featured);
@@ -198,12 +178,6 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
   ];
 
   const toggleFields = [
-    { key: 'wifi', label: t('admin.apartments.wifi_toggle') },
-    { key: 'desks', label: t('admin.apartments.desks_toggle') },
-    { key: 'elevator', label: t('admin.apartments.elevator_toggle') },
-    { key: 'garden', label: t('admin.apartments.garden_toggle') },
-    { key: 'airConditioning', label: t('admin.apartments.ac_toggle') },
-    { key: 'fans', label: t('admin.apartments.fans_toggle') },
     { key: 'available', label: t('admin.apartments.available_toggle') },
     { key: 'featured', label: t('admin.apartments.featured_toggle') },
   ];
@@ -260,60 +234,33 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                     />
                     <input
                       id="apt-id"
-                      type="text"
+                      type="number"
                       value={form.apartmentId}
                       onChange={(e) => setForm({ ...form, apartmentId: e.target.value })}
-                      className={`input uppercase bg-white dark:bg-dark-900 text-dark-900 dark:text-white ${isRTL ? 'pr-8' : 'pl-8'}`}
-                      placeholder="e.g. A102"
+                      className={`input bg-white dark:bg-dark-900 text-dark-900 dark:text-white ${isRTL ? 'pr-8' : 'pl-8'}`}
+                      placeholder="e.g. 10"
+                      min="1"
                       required
                     />
                   </div>
                   <p className="text-xs text-dark-400 mt-1">This code is unique and will be referenced in WhatsApp inquiries.</p>
                 </div>
 
-                {/* Rent Type + Price */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="label" htmlFor="apt-rent-type">Rent Type <span className="text-red-500">*</span></label>
-                    <div className="relative">
-                      <select
-                        id="apt-rent-type"
-                        value={form.rentType}
-                        onChange={(e) => setForm({ ...form, rentType: e.target.value })}
-                        className="input appearance-none"
-                        required
-                      >
-                        <option value="annual">🗓️ Annual (Yearly Rent)</option>
-                        <option value="seasonal">☀️ Seasonal (Summer Season)</option>
-                        <option value="winter">❄️ Winter (Monthly Rent)</option>
-                      </select>
-                      <ChevronDown
-                        size={14}
-                        className={`absolute top-1/2 -translate-y-1/2 text-dark-400 pointer-events-none ${isRTL ? 'left-3' : 'right-3'}`}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="label" htmlFor="apt-price">
-                      {form.rentType === 'annual' ? 'Annual Price' : form.rentType === 'seasonal' ? 'Seasonal Price (Full Season)' : 'Monthly Winter Price'}
-                      {' '}<span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="apt-price"
-                      type="number"
-                      value={form.price}
-                      onChange={(e) => setForm({ ...form, price: e.target.value })}
-                      className="input"
-                      placeholder={form.rentType === 'annual' ? 'e.g. 48000' : form.rentType === 'seasonal' ? 'e.g. 25000' : 'e.g. 4000'}
-                      min="0"
-                      required
-                    />
-                    <p className="text-xs text-dark-400 mt-1">
-                      {form.rentType === 'annual' && 'Total yearly rental price (EGP)'}
-                      {form.rentType === 'seasonal' && 'Full summer season price — not monthly (EGP)'}
-                      {form.rentType === 'winter' && 'Price per month for winter season (EGP)'}
-                    </p>
-                  </div>
+                {/* Price */}
+                <div>
+                  <label className="label" htmlFor="apt-price">
+                    Monthly Rent (EGP) <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="apt-price"
+                    type="number"
+                    value={form.price}
+                    onChange={(e) => setForm({ ...form, price: e.target.value })}
+                    className="input"
+                    placeholder="e.g. 4000"
+                    min="0"
+                    required
+                  />
                 </div>
 
                 {/* Location */}
@@ -336,6 +283,29 @@ const ApartmentModal = ({ apartment, districts, onClose, onSaved }) => {
                     />
                   </div>
                 </div>
+
+                {/* Property Type (Only for Vacation Districts) */}
+                {isVacation && (
+                  <div>
+                    <label className="label" htmlFor="apt-property-type">{t('admin.apartments.property_type_label')}</label>
+                    <div className="relative">
+                      <select
+                        id="apt-property-type"
+                        value={form.propertyType === 'apartment' ? 'chalet' : form.propertyType}
+                        onChange={(e) => setForm({ ...form, propertyType: e.target.value })}
+                        className="input appearance-none"
+                      >
+                        <option value="chalet">{t('admin.apartments.property_type_chalet')}</option>
+                        <option value="studio">{t('admin.apartments.property_type_studio')}</option>
+                      </select>
+                      <ChevronDown
+                        size={14}
+                        className={`absolute top-1/2 -translate-y-1/2 text-dark-400 pointer-events-none ${isRTL ? 'left-3' : 'right-3'}`}
+                      />
+                    </div>
+                  </div>
+                )}
+
 
                 {/* Description */}
                 <div>
@@ -627,12 +597,8 @@ const AdminApartments = () => {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg overflow-hidden bg-dark-100 dark:bg-dark-700 shrink-0">
-                            {apt.images?.[0] ? (
-                              isVideo(apt.images[0]) ? (
-                                <video src={apt.images[0]} className="w-full h-full object-cover" muted />
-                              ) : (
-                                <img src={apt.images[0]} alt={`Apartment ${apt.apartmentId}`} className="w-full h-full object-cover" />
-                              )
+                            {getThumbnail(apt.images) ? (
+                              <img src={getThumbnail(apt.images)} alt={`Apartment ${apt.apartmentId}`} className="w-full h-full object-cover" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
                                 <Building2 size={14} className="text-dark-400" />
@@ -640,7 +606,7 @@ const AdminApartments = () => {
                             )}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-medium text-dark-800 dark:text-dark-100 truncate max-w-[160px]">#{apt.apartmentId}</p>
+                            <p className="font-medium text-dark-800 dark:text-dark-100 truncate max-w-[160px]">{t('apartment.code_display', { code: apt.apartmentId })}</p>
                             <p className="text-xs text-dark-400">{apt.districtId?.name || '—'}</p>
                           </div>
                         </div>
@@ -651,14 +617,6 @@ const AdminApartments = () => {
                       <td className="px-4 py-3 hidden md:table-cell">
                         <div className="flex flex-col gap-0.5">
                           <span className="font-semibold text-primary-500">{formatPrice(apt.price)}</span>
-                          {(() => {
-                            const rt = RENT_TYPE_CONFIG[apt.rentType || 'annual'];
-                            return (
-                              <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium self-start ${rt.color}`}>
-                                {rt.emoji} {rt.label}
-                              </span>
-                            );
-                          })()}
                         </div>
                       </td>
                       <td className="px-4 py-3 hidden lg:table-cell">
@@ -772,7 +730,7 @@ const AdminApartments = () => {
                 </h3>
                 <p className="text-dark-500 dark:text-dark-400 text-sm mb-6">
                   {t('admin.apartments.delete_confirm')}{' '}
-                  <strong>"#{deleteConfirm.apartmentId}"</strong>?{' '}
+                  <strong>"{t('apartment.code_display', { code: deleteConfirm.apartmentId })}"</strong>?{' '}
                   {t('admin.apartments.delete_warning')}
                 </p>
                 <div className="flex gap-3">

@@ -21,15 +21,25 @@ const DistrictPage = () => {
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({ sort: 'newest' });
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedType, setSelectedType] = useState(null);
 
   const BackIcon = isRTL ? ArrowRight : ArrowLeft;
 
   useEffect(() => {
+    setLoading(true);
     districtAPI.getOne(id)
       .then((res) => {
-        setDistrict(res.data.data);
-        const titleName = isRTL && res.data.data.nameAr ? res.data.data.nameAr : res.data.data.name;
+        const d = res.data.data;
+        setDistrict(d);
+        const titleName = isRTL && d.nameAr ? d.nameAr : d.name;
         document.title = `${titleName} - UniStay`;
+        
+        if (!d.isVacation) {
+          fetchApartments(1, filters);
+        } else {
+          setLoading(false);
+          setSelectedType(null); // Reset on district change
+        }
       })
       .catch(() => setError(t('district_page.not_found_title')));
   }, [id, t]);
@@ -52,10 +62,12 @@ const DistrictPage = () => {
     }
   }, [id, filters, t]);
 
-  useEffect(() => {
-    fetchApartments(1, filters);
-    setCurrentPage(1);
-  }, [id]);
+  const handleTypeSelect = (type) => {
+    setSelectedType(type);
+    const newFilters = { ...filters, propertyType: type };
+    setFilters(newFilters);
+    fetchApartments(1, newFilters);
+  };
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
@@ -154,14 +166,59 @@ const DistrictPage = () => {
 
       {/* Content */}
       <div className="page-container py-8">
-        <FilterBar onFilterChange={handleFilterChange} initialFilters={{ districtId: id, sort: 'newest' }} />
+        {district?.isVacation && !selectedType ? (
+          <div className="py-16 text-center animate-fade-in">
+            <h2 className="font-display text-3xl font-bold text-dark-900 dark:text-white mb-8">
+              {t('district_page.choose_type', { defaultValue: 'What are you looking for?' })}
+            </h2>
+            <div className="flex flex-col sm:flex-row justify-center gap-6 max-w-2xl mx-auto">
+              <button 
+                onClick={() => handleTypeSelect('chalet')} 
+                className="flex-1 bg-white dark:bg-dark-800 p-10 rounded-2xl border-2 border-dark-100 dark:border-dark-700 hover:border-primary-500 dark:hover:border-primary-500 hover:shadow-xl transition-all group"
+              >
+                <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">🏖️</div>
+                <h3 className="font-display text-2xl font-bold text-dark-900 dark:text-white">
+                  {t('apartment.type_chalet')}
+                </h3>
+              </button>
+              <button 
+                onClick={() => handleTypeSelect('studio')} 
+                className="flex-1 bg-white dark:bg-dark-800 p-10 rounded-2xl border-2 border-dark-100 dark:border-dark-700 hover:border-primary-500 dark:hover:border-primary-500 hover:shadow-xl transition-all group"
+              >
+                <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">🛋️</div>
+                <h3 className="font-display text-2xl font-bold text-dark-900 dark:text-white">
+                  {t('apartment.type_studio')}
+                </h3>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="animate-fade-in">
+            {district?.isVacation && (
+              <div className="flex justify-center gap-2 mb-8 bg-dark-50 dark:bg-dark-800 p-2 rounded-xl w-fit mx-auto">
+                <button 
+                  onClick={() => handleTypeSelect('chalet')} 
+                  className={`px-6 py-2 rounded-lg font-medium transition-colors ${selectedType === 'chalet' ? 'bg-primary-500 text-white shadow-md' : 'text-dark-600 hover:text-primary-500'}`}
+                >
+                  🏖️ {t('apartment.type_chalet')}
+                </button>
+                <button 
+                  onClick={() => handleTypeSelect('studio')} 
+                  className={`px-6 py-2 rounded-lg font-medium transition-colors ${selectedType === 'studio' ? 'bg-primary-500 text-white shadow-md' : 'text-dark-600 hover:text-primary-500'}`}
+                >
+                  🛋️ {t('apartment.type_studio')}
+                </button>
+              </div>
+            )}
 
-        {/* Results count */}
-        {!loading && (
-          <p className="text-sm text-dark-500 dark:text-dark-400 mb-4">
-            {t('district_page.results_other', { count: pagination.total })}
-          </p>
-        )}
+            <FilterBar onFilterChange={handleFilterChange} initialFilters={{ districtId: id, sort: 'newest', propertyType: selectedType || '' }} />
+
+            {/* Results count */}
+            {!loading && (
+              <p className="text-sm text-dark-500 dark:text-dark-400 mb-4">
+                {t('district_page.results_other', { count: pagination.total })}
+              </p>
+            )}
 
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -183,11 +240,13 @@ const DistrictPage = () => {
           </div>
         )}
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={pagination.totalPages}
-          onPageChange={handlePageChange}
-        />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={pagination.totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

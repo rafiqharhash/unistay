@@ -62,6 +62,7 @@ const getApartments = async (req, res, next) => {
       featured,
       gender,
       available,
+      propertyType,
     } = req.query;
 
     const query = {};
@@ -71,6 +72,7 @@ const getApartments = async (req, res, next) => {
     if (gender && ['male', 'female', 'mixed'].includes(gender)) query.gender = gender;
     if (available !== undefined) query.available = available === 'true';
     if (featured !== undefined) query.featured = featured === 'true';
+    if (propertyType) query.propertyType = propertyType;
 
     if (minPrice || maxPrice) {
       query.price = {};
@@ -220,17 +222,12 @@ const createApartment = async (req, res, next) => {
       rooms: Number(req.body.rooms) || 1,
       capacity: Number(req.body.capacity) || 1,
       gender: req.body.gender || 'mixed',
-      wifi: req.body.wifi === 'true' || req.body.wifi === true,
-      desks: req.body.desks === 'true' || req.body.desks === true,
-      elevator: req.body.elevator === 'true' || req.body.elevator === true,
-      garden: req.body.garden === 'true' || req.body.garden === true,
-      airConditioning: req.body.airConditioning === 'true' || req.body.airConditioning === true,
-      fans: req.body.fans === 'true' || req.body.fans === true,
+
       availableBeds: Number(req.body.availableBeds) || 0,
       available: req.body.available !== 'false' && req.body.available !== false,
       featured: req.body.featured === 'true' || req.body.featured === true,
       contactInfo,
-      rentType: req.body.rentType || 'annual',
+      propertyType: req.body.propertyType || 'apartment',
     });
 
     const populated = await apartment.populate('districtId', 'name');
@@ -304,16 +301,11 @@ const updateApartment = async (req, res, next) => {
     if (req.body.availableBeds !== undefined) apartment.availableBeds = Number(req.body.availableBeds);
     if (req.body.rooms !== undefined) apartment.rooms = Number(req.body.rooms);
     if (req.body.gender !== undefined) apartment.gender = req.body.gender;
-    if (req.body.wifi !== undefined) apartment.wifi = req.body.wifi === 'true' || req.body.wifi === true;
-    if (req.body.desks !== undefined) apartment.desks = req.body.desks === 'true' || req.body.desks === true;
-    if (req.body.elevator !== undefined) apartment.elevator = req.body.elevator === 'true' || req.body.elevator === true;
-    if (req.body.garden !== undefined) apartment.garden = req.body.garden === 'true' || req.body.garden === true;
-    if (req.body.airConditioning !== undefined) apartment.airConditioning = req.body.airConditioning === 'true' || req.body.airConditioning === true;
-    if (req.body.fans !== undefined) apartment.fans = req.body.fans === 'true' || req.body.fans === true;
+
     if (req.body.available !== undefined) apartment.available = req.body.available === 'true' || req.body.available === true;
     if (req.body.featured !== undefined) apartment.featured = req.body.featured === 'true' || req.body.featured === true;
-    if (req.body.rentType !== undefined && ['annual', 'seasonal', 'winter'].includes(req.body.rentType)) {
-      apartment.rentType = req.body.rentType;
+    if (req.body.propertyType !== undefined && ['apartment', 'studio', 'chalet'].includes(req.body.propertyType)) {
+      apartment.propertyType = req.body.propertyType;
     }
     apartment.contactInfo = contactInfo;
     apartment.images = [...existingImages, ...newImageUrls];

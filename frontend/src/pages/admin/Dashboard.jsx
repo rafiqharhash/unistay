@@ -8,6 +8,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../context/LanguageContext';
 import { adminAPI } from '../../api/axios';
+import { getThumbnail } from '../../utils/media';
 
 const formatPrice = (price) =>
   new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(price);
@@ -171,8 +172,8 @@ const AdminDashboard = () => {
                     className="flex items-center gap-4 p-4 hover:bg-dark-50 dark:hover:bg-dark-700/50 transition-colors group"
                   >
                     <div className="w-10 h-10 rounded-xl overflow-hidden bg-dark-100 dark:bg-dark-700 shrink-0">
-                      {apt.images?.[0] ? (
-                        <img src={apt.images[0]} alt={apt.title} className="w-full h-full object-cover" />
+                      {getThumbnail(apt.images) ? (
+                        <img src={getThumbnail(apt.images)} alt={apt.title} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <Building2 size={16} className="text-dark-400" />
@@ -185,7 +186,7 @@ const AdminDashboard = () => {
                       </p>
                       <div className="flex items-center gap-2 text-xs text-dark-400">
                         <Hash size={10} />
-                        {apt.apartmentId}
+                        {t('apartment.code_display', { code: apt.apartmentId })}
                         {apt.districtId?.name && <span>• {apt.districtId.name}</span>}
                       </div>
                     </div>

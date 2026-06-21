@@ -58,7 +58,8 @@
     "not_found_title": "District Not Found",
     "go_home": "Go Home",
     "results_one": "{{count}} apartment found",
-    "results_other": "{{count}} apartments found"
+    "results_other": "{{count}} apartments found",
+    "choose_type": "What are you looking for?"
   },
   "search": {
     "results_for": "Results for \"{{query}}\"",
@@ -113,7 +114,10 @@
     "link_copied": "Link copied to clipboard!",
     "building_apt": "Building {{building}}, Code {{apt}}",
     "featured_label": "Featured",
-    "whatsapp_inquire": "Inquire on WhatsApp"
+    "whatsapp_inquire": "Inquire on WhatsApp",
+    "code_display": "CODE {{code}}",
+    "type_chalet": "Chalet",
+    "type_studio": "Studio"
   },
   "filter": {
     "search_placeholder": "Search by Apartment ID...",
@@ -122,6 +126,8 @@
     "price_desc": "Price: High to Low",
     "filters_btn": "Filters",
     "clear": "Clear",
+    "property_type_label": "Property Type",
+    "all_types": "All Types",
     "district_label": "District",
     "all_districts": "All Districts",
     "min_price": "Min Price (EGP)",
@@ -310,7 +316,10 @@
       "marked_unavailable": "Marked as unavailable.",
       "update_failed": "Failed to update.",
       "some_skipped": "Some files were skipped (not images or videos).",
-      "new_badge": "New"
+      "new_badge": "New",
+      "property_type_label": "Property Type *",
+      "property_type_chalet": "🏖️ Chalet",
+      "property_type_studio": "🛋️ Studio"
     }
   },
   "common": {
