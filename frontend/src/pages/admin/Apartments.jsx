@@ -608,6 +608,30 @@ const AdminApartments = () => {
                           <div className="min-w-0">
                             <p className="font-medium text-dark-800 dark:text-dark-100 truncate max-w-[160px]">{t('apartment.code_display', { code: apt.apartmentId })}</p>
                             <p className="text-xs text-dark-400">{apt.districtId?.name || '—'}</p>
+                            {/* Mobile-only availability + featured toggles */}
+                            <div className="flex items-center gap-1.5 mt-1.5 lg:hidden">
+                              <button
+                                onClick={() => handleToggleAvailable(apt)}
+                                id={`toggle-available-mobile-${apt._id}`}
+                                title={apt.available ? 'Click to mark as Unavailable' : 'Click to mark as Available'}
+                                className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold border transition-all ${
+                                  apt.available
+                                    ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
+                                    : 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40'
+                                }`}
+                              >
+                                {apt.available ? <CheckCircle size={10} /> : <XCircle size={10} />}
+                                {apt.available ? 'Available' : 'Not Available'}
+                              </button>
+                              <button
+                                onClick={() => handleToggleFeatured(apt)}
+                                id={`toggle-featured-mobile-${apt._id}`}
+                                title="Toggle featured"
+                                className={`badge cursor-pointer hover:opacity-75 transition-opacity ${apt.featured ? 'badge-featured' : 'bg-dark-100 dark:bg-dark-700 text-dark-400'}`}
+                              >
+                                <Star size={10} fill={apt.featured ? 'currentColor' : 'none'} />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </td>
